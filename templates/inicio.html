@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administrador</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Bienvenido al Panel de Administrador</h1>
+                <p>Desde aquí puedes gestionar tu tienda en línea.</p>
+            </div>
+            <div class="col-md-6 text-right">
+                <!-- Agregando botones en la parte superior derecha -->
+                <a href="{{ url_for('ver_cuenta') }}" class="btn btn-primary mr-2">Ver cuenta</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Cerrar sesión</a>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h2>Productos</h2>
+                <p>Administra tus productos aquí.</p>
+                <a href="{{ url_for('productos') }}" class="btn btn-primary">Administrar Productos</a>
+            </div>
+            <div class="col-md-6">
+                <h2>Usuarios</h2>
+                <p>Administra los usuarios de tu tienda aquí.</p>
+                <!-- Modificado el enlace para dirigirse a la ruta 'administrar_usuarios' -->
+                <a href="{{ url_for('administrar_usuarios') }}" class="btn btn-primary">Administrar Usuarios</a>
+            </div>
+        </div>
+        <!-- Nuevo botón para configurar el sitio -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h2>Configuración del Sitio</h2>
+                <p>Configura la información del sitio aquí.</p>
+                <a href="{{ url_for('mostrar_sitio') }}" class="btn btn-primary">Configurar Sitio</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

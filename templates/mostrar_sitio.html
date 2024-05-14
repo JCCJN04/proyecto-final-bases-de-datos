@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mostrar Sitio</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Datos de la Tienda</h1>
+        <p>A continuación se muestran los datos de la tienda:</p>
+        <ul>
+            <li>Nombre de la tienda: {{ tienda.nombre_tienda }}</li>
+            <li>Calle: {{ tienda.calle }}</li>
+            <li>Colonia: {{ tienda.colonia }}</li>
+            <li>Código Postal: {{ tienda.codigo_postal }}</li>
+            <li>Ciudad: {{ tienda.ciudad }}</li>
+            <li>Estado: {{ tienda.estado }}</li>
+            <li>País: {{ tienda.pais }}</li>
+            <li>Teléfono: {{ tienda.telefono }}</li>
+            <li>Correo Electrónico: {{ tienda.email }}</li>
+        </ul>
+        <a href="{{ url_for('configurar_sitio') }}" class="btn btn-primary">Modificar Datos</a>
+    </div>
+</body>
+</html>

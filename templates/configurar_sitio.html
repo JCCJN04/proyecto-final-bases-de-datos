@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración del Sitio</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Configuración del Sitio</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label for="nombre_tienda">Nombre de la tienda:</label>
+                <input type="text" class="form-control" id="nombre_tienda" name="nombre_tienda" value="{{ tienda.nombre_tienda }}">
+            </div>
+            <div class="form-group">
+                <label for="calle">Calle:</label>
+                <input type="text" class="form-control" id="calle" name="calle" value="{{ tienda.calle }}">
+            </div>
+            <div class="form-group">
+                <label for="colonia">Colonia:</label>
+                <input type="text" class="form-control" id="colonia" name="colonia" value="{{ tienda.colonia }}">
+            </div>
+            <div class="form-group">
+                <label for="codigo_postal">Código Postal:</label>
+                <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" value="{{ tienda.codigo_postal }}">
+            </div>
+            <div class="form-group">
+                <label for="ciudad">Ciudad:</label>
+                <input type="text" class="form-control" id="ciudad" name="ciudad" value="{{ tienda.ciudad }}">
+            </div>
+            <div class="form-group">
+                <label for="estado">Estado:</label>
+                <input type="text" class="form-control" id="estado" name="estado" value="{{ tienda.estado }}">
+            </div>
+            <div class="form-group">
+                <label for="pais">País:</label>
+                <input type="text" class="form-control" id="pais" name="pais" value="{{ tienda.pais }}">
+            </div>
+            <div class="form-group">
+                <label for="telefono">Teléfono:</label>
+                <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ tienda.telefono }}">
+            </div>
+            <div class="form-group">
+                <label for="email">Correo Electrónico:</label>
+                <input type="email" class="form-control" id="email" name="email" value="{{ tienda.email }}">
+            </div>
+            <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+        </form>
+    </div>
+</body>
+</html>
