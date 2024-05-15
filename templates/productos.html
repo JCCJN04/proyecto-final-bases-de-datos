@@ -35,8 +35,14 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ producto[1] }}</h5>
                         <p class="card-text">{{ producto[2] }}</p>
-                        <p class="card-text">Stock: {{ producto[3] }}</p>
-                        <p class="card-text">Categoría: {{ producto[4] }}</p>
+                        <p class="card-text">Stock: {{ stocks[producto[0]] }}</p>                        
+                        <p class="card-text">Categoría: 
+                            {% for categoria in categorias[producto[0]] %}
+                                {{ categoria }}
+                                {% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        <p class="card-text">Marca: {{ marcas[producto[0]] }}</p> 
+                        
                         <a href="{{ url_for('editar_producto', producto_id=producto[0]) }}" class="btn btn-primary">Editar</a>
                     </div>
                 </div>

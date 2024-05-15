@@ -87,36 +87,57 @@ def productos():
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM productos")
         productos = cur.fetchall()
-        cur.close()
 
         # Consulta para obtener las imágenes de los productos
         imagenes = {}
         for producto in productos:
             id_producto = producto[0]
             query_imagenes = f"SELECT url_imagen FROM imagenes WHERE id_producto = {id_producto}"
-            cur = mysql.connection.cursor()
             cur.execute(query_imagenes)
             imagenes[id_producto] = cur.fetchall()
-            cur.close()
 
         # Consulta para obtener los descuentos de los productos
         descuentos = {}
         for producto in productos:
             id_producto = producto[0]
             query_descuentos = f"SELECT porcentaje FROM descuentos WHERE id_producto = {id_producto}"
-            cur = mysql.connection.cursor()
             cur.execute(query_descuentos)
             descuentos[id_producto] = cur.fetchone()
-            cur.close()
+
+        # Consulta para obtener los stocks de los productos
+        stocks = {}
+        for producto in productos:
+            id_producto = producto[0]
+            cur.execute("SELECT cantidad_stock FROM stocks WHERE id_stock = %s", (producto[3],))
+            stock = cur.fetchone()
+            stocks[id_producto] = stock[0]
+
+        # Consulta para obtener las categorías de los productos
+        categorias = {}
+        for producto in productos:
+            id_producto = producto[0]
+            cur.execute("SELECT nombre_categoria FROM categorias WHERE id_producto = %s", (id_producto,))
+            categorias[id_producto] = [row[0] for row in cur.fetchall()]
+
+        # Consulta para obtener las marcas de los productos
+        marcas = {}
+        for producto in productos:
+            id_marca = producto[4]  # Obtener el ID de la marca del producto
+            cur.execute("SELECT nombre_marca FROM marcas WHERE id_marca = %s", (id_marca,))
+            marca = cur.fetchone()
+            marcas[producto[0]] = marca[0] if marca else "Marca desconocida"  # Asociar la marca al ID del producto
+            
+        cur.close()
 
         # Preenumerar la lista de imágenes
         for id_producto, lista_imagenes in imagenes.items():
             imagenes[id_producto] = list(enumerate(lista_imagenes))
 
-        return render_template('productos.html', productos=productos, imagenes=imagenes, descuentos=descuentos)
+        return render_template('productos.html', productos=productos, imagenes=imagenes, descuentos=descuentos, stocks=stocks, categorias=categorias,marcas=marcas)
     else:
         flash('Debes iniciar sesión para ver los productos.', 'warning')
         return redirect(url_for('login'))
+
 
 @app.route('/administrar_usuarios')
 def administrar_usuarios():
@@ -195,42 +216,51 @@ def agregar_producto():
         descripcion_producto = request.form['descripcion_producto']
         id_stock = request.form['id_stock']
         id_marca = request.form['id_marca']
+        imagen_producto = request.form['imagen_producto']  # Obtener la URL de la imagen
 
+        # Obtener las categorías desde la base de datos
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO productos (nombre_producto, descripcion_producto, id_stock, id_marca) VALUES (%s, %s, %s, %s)",
-                    (nombre_producto, descripcion_producto, id_stock, id_marca))
-        mysql.connection.commit()
+        cur.execute("SELECT * FROM categorias")
+        categorias = cur.fetchall()
         cur.close()
 
-        flash('Producto agregado correctamente', 'success')
-        return redirect(url_for('productos'))
+        return render_template('agregar_producto.html', categorias=categorias)
 
     return render_template('agregar_producto.html')
+
 
 @app.route('/editar_producto/<int:producto_id>', methods=['GET', 'POST'])
 def editar_producto(producto_id):
     if request.method == 'POST':
-        # Handle form submission for editing the product here
-        # Retrieve form data, update the database, etc.
+        # Manejar el envío del formulario para editar el producto aquí
+        # Recuperar los datos del formulario, actualizar la base de datos, etc.
         flash('Producto editado correctamente', 'success')
         return redirect(url_for('productos'))
     else:
-        # Fetch existing product data from the database
+        # Obtener los datos del producto existente de la base de datos
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM productos WHERE id_producto = %s", (producto_id,))
         producto = cur.fetchone()
         cur.close()
 
-        # Check if the product exists
+        # Verificar si el producto existe
         if producto:
-            # Pass the product data to the template to pre-fill the form fields
+            # Pasar los datos del producto a la plantilla para rellenar los campos del formulario
             return render_template('editar_producto.html', producto=producto)
         else:
             flash('El producto no existe', 'error')
             return redirect(url_for('productos'))
+
         
 @app.route('/configurar_sitio', methods=['GET', 'POST'])
 def configurar_sitio():
+    mensaje = None
+    # Consultar los datos de la tienda desde la base de datos
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM tienda")
+    tienda = cur.fetchone()
+    cur.close()
+    
     if request.method == 'POST':
         # Obtener los datos del formulario
         nombre_tienda = request.form['nombre_tienda']
@@ -256,31 +286,30 @@ def configurar_sitio():
                 pais = %s, 
                 telefono = %s, 
                 email = %s
-        """, (nombre_tienda, calle, colonia, codigo_postal, ciudad, estado, pais, telefono, email))
+            WHERE id_tienda = %s
+        """, (nombre_tienda, calle, colonia, codigo_postal, ciudad, estado, pais, telefono, email, tienda[0]))
         mysql.connection.commit()
         cur.close()
         
-        # Redirigir a una página de éxito o donde desees
-        return redirect(url_for('exito'))
+        # Configurar mensaje de cambio exitoso
+        flash('Cambio exitoso', 'success')
+        return redirect(url_for('configurar_sitio'))
 
-    # Si es una solicitud GET, obtener los datos de la tienda desde la base de datos
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM tienda")
-    tienda = cur.fetchone()
-    cur.close()
+    # Si es un método GET o POST, renderiza el formulario con los datos de la tienda
+    return render_template('configurar_sitio.html', tienda=tienda, mensaje=mensaje)
 
-    # Renderizar la plantilla con los datos de la tienda
-    return render_template('configurar_sitio.html', tienda=tienda)
 
+
+@app.route('/mostrar_sitio')
 def mostrar_sitio():
-    # Obtener los datos de la tienda desde la base de datos
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM tienda")
+    cur.execute("SELECT * FROM tienda WHERE id_tienda = 1")
     tienda = cur.fetchone()
     cur.close()
-
-    # Renderizar la plantilla con los datos de la tienda
-    return render_template('mostrar_sitio.html', tienda=tienda)
+    if tienda:
+        return render_template('mostrar_sitio.html', tienda=tienda)
+    else:
+        return "La tienda no se encontró en la base de datos"
 
 if __name__ == '__main__':
     app.run(debug=True)

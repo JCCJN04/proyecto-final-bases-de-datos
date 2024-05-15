@@ -11,17 +11,18 @@
         <h1>Datos de la Tienda</h1>
         <p>A continuación se muestran los datos de la tienda:</p>
         <ul>
-            <li>Nombre de la tienda: {{ tienda.nombre_tienda }}</li>
-            <li>Calle: {{ tienda.calle }}</li>
-            <li>Colonia: {{ tienda.colonia }}</li>
-            <li>Código Postal: {{ tienda.codigo_postal }}</li>
-            <li>Ciudad: {{ tienda.ciudad }}</li>
-            <li>Estado: {{ tienda.estado }}</li>
-            <li>País: {{ tienda.pais }}</li>
-            <li>Teléfono: {{ tienda.telefono }}</li>
-            <li>Correo Electrónico: {{ tienda.email }}</li>
+            <li>Nombre de la tienda: {{ tienda[1] }}</li>
+            <li>Calle: {{ tienda[2] }}</li>
+            <li>Colonia: {{ tienda[3] }}</li>
+            <li>Código Postal: {{ tienda[4] }}</li>
+            <li>Ciudad: {{ tienda[5] }}</li>
+            <li>Estado: {{ tienda[6] }}</li>
+            <li>País: {{ tienda[7] }}</li>
+            <li>Teléfono: {{ tienda[8] }}</li>
+            <li>Correo Electrónico: {{ tienda[9] }}</li>
         </ul>
         <a href="{{ url_for('configurar_sitio') }}" class="btn btn-primary">Modificar Datos</a>
+        <a href="{{ url_for('inicio') }}" class="btn btn-secondary">Regresar a Inicio</a>
     </div>
 </body>
 </html>

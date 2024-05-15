@@ -10,6 +10,10 @@
     <div class="container mt-5">
         <h1>Configuración del Sitio</h1>
         <form method="POST">
+            <div class="form-group" style="display: none;">
+                <label for="id_tienda">ID de la tienda:</label>
+                <input type="text" class="form-control" id="id_tienda" name="id_tienda" value="1" readonly>
+            </div>
             <div class="form-group">
                 <label for="nombre_tienda">Nombre de la tienda:</label>
                 <input type="text" class="form-control" id="nombre_tienda" name="nombre_tienda" value="{{ tienda.nombre_tienda }}">
@@ -47,6 +51,7 @@
                 <input type="email" class="form-control" id="email" name="email" value="{{ tienda.email }}">
             </div>
             <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+            <a href="/mostrar_sitio" class="btn btn-secondary">Regresar a Mostrar Sitio</a>
         </form>
     </div>
 </body>
