@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Categoría</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Agregar Categoría</h1>
+
+        <!-- Formulario para agregar una nueva categoría -->
+        <form action="/agregar_categoria" method="post">
+            <div class="form-group">
+                <label for="nombre">Nombre de la Categoría:</label>
+                <input type="text" class="form-control" id="nombre" name="nombre_categoria" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Agregar Categoría</button>
+        </form>
+        <p></p>
+        <!-- Botón para regresar a la página de inicio -->
+        <a href="/gestionar_categorias" class="btn btn-secondary">Regresar a Categorias</a>
+    </div>
+</body>
+</html>

@@ -70,8 +70,6 @@ def logout():
     flash('¡Has cerrado sesión correctamente!', 'info')
     return redirect(url_for('login'))  # Redirige al inicio de sesión después de cerrar sesión
 
-
-
 @app.route('/')
 def inicio():
     if 'logged_in' in session:
@@ -116,7 +114,7 @@ def productos():
         categorias = {}
         for producto in productos:
             id_producto = producto[0]
-            cur.execute("SELECT nombre_categoria FROM categorias WHERE id_producto = %s", (id_producto,))
+            cur.execute("SELECT nombre_categoria FROM categorias WHERE id_categoria = %s", (producto[5],))
             categorias[id_producto] = [row[0] for row in cur.fetchall()]
 
         # Consulta para obtener las marcas de los productos
@@ -298,8 +296,6 @@ def configurar_sitio():
     # Si es un método GET o POST, renderiza el formulario con los datos de la tienda
     return render_template('configurar_sitio.html', tienda=tienda, mensaje=mensaje)
 
-
-
 @app.route('/mostrar_sitio')
 def mostrar_sitio():
     cur = mysql.connection.cursor()
@@ -310,6 +306,123 @@ def mostrar_sitio():
         return render_template('mostrar_sitio.html', tienda=tienda)
     else:
         return "La tienda no se encontró en la base de datos"
+
+@app.route('/gestionar_categorias')
+def gestionar_categorias():
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM categorias")
+        categorias = cur.fetchall()
+        cur.close()
+        print("Categorías recuperadas:", categorias)  # Mensaje de depuración
+        return render_template('gestionar_categorias.html', categorias=categorias)
+    except Exception as e:
+        print("Error al recuperar categorías:", e)  # Mensaje de error
+        return "Error al recuperar categorías", 500
+    
+@app.route('/agregar_categoria', methods=['GET', 'POST'])
+def crear_categoria():
+    if request.method == 'POST':
+        nombre_categoria = request.form['nombre_categoria']
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO categorias (nombre_categoria) VALUES (%s)", (nombre_categoria,))
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('gestionar_categorias'))
+    return render_template('agregar_categoria.html')
+
+@app.route('/eliminar_categoria/<int:id_categoria>', methods=['POST'])
+def eliminar_categoria(id_categoria):
+    if request.method == 'POST':
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE FROM categorias WHERE id_categoria = %s", (id_categoria,))
+        mysql.connection.commit()
+        cur.close()
+        return redirect(url_for('gestionar_categorias'))
+
+@app.route('/editar_categoria/<int:id_categoria>', methods=['GET', 'POST'])
+def editar_categoria(id_categoria):
+    
+    if request.method == 'POST':
+        # Manejar el envío del formulario para editar el producto aquí
+        # Recuperar los datos del formulario, actualizar la base de datos, etc.
+        flash('Producto editado correctamente', 'success')
+        return redirect(url_for('gestionar_categorias'))
+    else:
+        # Obtener los datos del producto existente de la base de datos
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM categorias WHERE id_categoria = %s", (id_categoria,))
+        categoria = cur.fetchall()
+        cur.close()
+
+        # Verificar si el producto existe
+        if categoria:
+            # Pasar los datos del producto a la plantilla para rellenar los campos del formulario
+            return render_template('editar_categoria.html', categoria=categoria)
+        else:
+            flash('La categoria no existe', 'error')
+            return redirect(url_for('gestionar_categorias'))
+
+
+
+
+
+
+
+
+
+@app.route('/gestionar_descuentos')
+def gestionar_descuentos():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM descuentos")
+    descuentos = cur.fetchall()
+    cur.close()
+    return render_template('gestionar_descuentos.html', descuentos=descuentos)
+
+@app.route('/descuentos/<int:id>/editar')
+def editar_descuento(id):
+    
+    if request.method == 'POST':
+        # Manejar el envío del formulario para editar el producto aquí
+        # Recuperar los datos del formulario, actualizar la base de datos, etc.
+        flash('Producto editado correctamente', 'success')
+        return redirect(url_for('gestionar_descuentos'))
+    else:
+        # Obtener los datos del producto existente de la base de datos
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM descuentos WHERE id_descuento = %s", (id,))
+        descuento = cur.fetchone()
+        cur.close()
+
+        # Verificar si el producto existe
+        if descuento:
+            # Pasar los datos del producto a la plantilla para rellenar los campos del formulario
+            return render_template('editar_descuentos.html', descuento=descuento)
+        else:
+            flash('El producto no existe', 'error')
+            return redirect(url_for('gestionar_descuentos'))
+
+@app.route('/descuentos/<int:id>/eliminar', methods=['POST'])
+def eliminar_descuento(id):
+    if request.method == 'POST':
+        # Conexión a la base de datos
+        cur = mysql.connection.cursor()
+        try:
+            # Eliminar el registro de la tabla descuentos
+            cur.execute("DELETE FROM descuentos WHERE id_descuento = %s", (id,))
+            
+            # Confirmar la transacción
+            mysql.connection.commit()
+            
+            flash('Descuento eliminado correctamente', 'success')
+        except Exception as e:
+            flash('Error al eliminar el descuento', 'error')
+        
+        # Cerrar el cursor
+        cur.close()
+    
+    return redirect('/gestionar_descuentos')
+
 
 if __name__ == '__main__':
     app.run(debug=True)

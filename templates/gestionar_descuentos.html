@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Descuentos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Gestión de Descuentos</h1>
+
+        <!-- Lista de descuentos existentes -->
+        <h2>Lista de Descuentos</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Código</th>
+                    <th>Cantidad</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Fecha de Fin</th>
+                    <th>Porcentaje</th>
+                    <th>Descripción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for descuento in descuentos %}
+                <tr>
+                    <td>{{ descuento[0] }}</td>
+                    <td>{{ descuento[4] }}</td>
+                    <td>{{ descuento[5] }}</td>
+                    <td>{{ descuento[6] }}</td>
+                    <td>{{ descuento[7] }}</td>
+                    <td>{{ descuento[8] }}</td>
+                    <td>{{ descuento[9] }}</td>
+                    <td>
+                        <a href="/descuentos/{{ descuento[0] }}/editar" class="btn btn-primary">Editar</a>
+                        <a href="/descuentos/{{ descuento[0] }}/eliminar" class="btn btn-danger" onclick="event.preventDefault(); document.getElementById('delete-form').submit();">Eliminar</a>
+                        <form id="delete-form" action="/descuentos/{{ descuento[0] }}/eliminar" method="POST" style="display: none;">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <!-- Puedes incluir más campos ocultos aquí si es necesario -->
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+            <!-- Botón para agregar un nuevo descuento -->
+            <a href="/agregar_descuento" class="btn btn-primary">Agregar Descuento</a>
+
+            <!-- Botón para regresar a la página de inicio -->
+            <a href="/" class="btn btn-secondary">Regresar a Inicio</a>
+    </div>
+</body>
+</html>
