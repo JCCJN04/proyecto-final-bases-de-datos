@@ -3,40 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Categorías</title>
+    <title>Gestión de Categorias</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Gestión de Categorías</h1>
+        <h1>Gestión de Categorias</h1>
 
-        <!-- Lista de categorías existentes -->
-        <h2>Lista de Categorías</h2>
+        <h2>Lista de Descuentos</h2>
         <table class="table">
             <thead>
                 <tr>
+                    <th>ID</th>
                     <th>Nombre</th>
-                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody>
                 {% for categoria in categorias %}
                 <tr>
+                    <td>{{ categoria[0] }}</td>
                     <td>{{ categoria[1] }}</td>
                     <td>
-                        <form action="/editar_categoria/{{ categoria[0] }}" method="post">
-                            <button type="submit" class="btn btn-primary btn-sm">Editar</button>
-                        </form>                        
-                        <form action="/eliminar_categoria/{{ categoria[0] }}" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta categoría?');">
-                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        <a href="/categorias/{{ categoria[0] }}/editar" class="btn btn-primary">Editar</a>
+                        <a href="/categorias/{{ categoria[0] }}/eliminar" class="btn btn-danger" onclick="event.preventDefault(); document.getElementById('delete-form').submit();">Eliminar</a>
+                        <form id="delete-form" action="/categorias/{{ categorias[0] }}/eliminar" method="POST" style="display: none;">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <!-- Puedes incluir más campos ocultos aquí si es necesario -->
                         </form>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-            <!-- Botón para agregar una nueva categoría -->
-            <a href="/agregar_categoria" class="btn btn-primary">Agregar Categoría</a>
+            <!-- Botón para agregar un nuevo descuento -->
+            <a href="/categorias/agregar" class="btn btn-primary">Agregar Categoria</a>
 
             <!-- Botón para regresar a la página de inicio -->
             <a href="/" class="btn btn-secondary">Regresar a Inicio</a>

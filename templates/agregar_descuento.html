@@ -3,39 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Descuento</title>
+    <title>Agregar Descuento</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Editar Descuento</h1>
+        <h1>Agregar Descuento</h1>
         <form method="POST">
             <div class="form-group">
-                <label for="codigo">Código Producto:</label>
-                <input type="text" class="form-control" id="codigo" name="codigo" value="{{ descuento[4] }}">
+                <label for="codigo_producto">Código de Producto:</label>
+                <input type="text" class="form-control" id="codigo_producto" name="codigo_producto">
+            </div>
+            <div class="form-group">
+                <label for="estado_descuento">Estado Descuento:</label>
+                <input type="text" class="form-control" id="estado_descuento" name="estado_descuento">
+            </div>
+            <div class="form-group">
+                <label for="tipo_descuento">Tipo Descuento:</label>
+                <input type="text" class="form-control" id="tipo_descuento" name="tipo_descuento">
+            </div>
+            <div class="form-group">
+                <label for="codigo">Código:</label>
+                <input type="text" class="form-control" id="codigo" name="codigo">
             </div>
             <div class="form-group">
                 <label for="cantidad">Cantidad:</label>
-                <input type="number" class="form-control" id="cantidad" name="cantidad" value="{{ descuento[5] }}">
+                <input type="number" class="form-control" id="cantidad" name="cantidad">
             </div>
             <div class="form-group">
                 <label for="fecha_inicio">Fecha de Inicio:</label>
-                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ descuento[6] }}">
+                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio">
             </div>
             <div class="form-group">
                 <label for="fecha_fin">Fecha de Fin:</label>
-                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" value="{{ descuento[7] }}">
+                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin">
             </div>
             <div class="form-group">
                 <label for="porcentaje">Porcentaje:</label>
-                <input type="number" class="form-control" id="porcentaje" name="porcentaje" value="{{ descuento[8] }}">
+                <input type="number" class="form-control" id="porcentaje" name="porcentaje">
             </div>
             <div class="form-group">
                 <label for="descripcion">Descripción:</label>
-                <input type="text" class="form-control" id="descripcion" name="descripcion" value="{{ descuento[9] }}">
+                <input type="text" class="form-control" id="descripcion" name="descripcion">
             </div>
 
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <button type="submit" class="btn btn-primary">Agregar Descuento</button>
             <a href="/gestionar_descuentos" class="btn btn-primary">Regresar a Descuentos</a>
         </form>
     </div>

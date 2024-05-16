@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Categoría</title>
+    <title>Editar Categoria</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Editar Categoría</h1>
+        <h1>Editar Categoria</h1>
         <form method="POST">
             <div class="form-group">
-                <label for="nombre_categoria">Nombre de la Categoría:</label>
+                <label for="nombre_categoria">Nombre Categoria:</label>
                 <input type="text" class="form-control" id="nombre_categoria" name="nombre_categoria" value="{{ categoria[1] }}">
             </div>
+
             <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-            <a href="/gestionar_categorias" class="btn btn-primary">Regresar a Categorías</a>
+            <a href="/gestionar_categorias" class="btn btn-primary">Regresar a Categorias</a>
         </form>
     </div>
 </body>

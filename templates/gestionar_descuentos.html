@@ -16,6 +16,9 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Código Producto</th>
+                    <th>Estado</th>
+                    <th>Tipo</th>
                     <th>Código</th>
                     <th>Cantidad</th>
                     <th>Fecha de Inicio</th>
@@ -28,6 +31,9 @@
                 {% for descuento in descuentos %}
                 <tr>
                     <td>{{ descuento[0] }}</td>
+                    <td>{{ descuento[1] }}</td>
+                    <td>{{ descuento[2] }}</td>
+                    <td>{{ descuento[3] }}</td>
                     <td>{{ descuento[4] }}</td>
                     <td>{{ descuento[5] }}</td>
                     <td>{{ descuento[6] }}</td>
@@ -40,14 +46,14 @@
                         <form id="delete-form" action="/descuentos/{{ descuento[0] }}/eliminar" method="POST" style="display: none;">
                             <input type="hidden" name="_method" value="DELETE">
                             <!-- Puedes incluir más campos ocultos aquí si es necesario -->
-                        </form>
+                        </form>                        
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
             <!-- Botón para agregar un nuevo descuento -->
-            <a href="/agregar_descuento" class="btn btn-primary">Agregar Descuento</a>
+            <a href="/descuentos/agregar" class="btn btn-primary">Agregar Descuento</a>
 
             <!-- Botón para regresar a la página de inicio -->
             <a href="/" class="btn btn-secondary">Regresar a Inicio</a>

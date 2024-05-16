@@ -61,7 +61,6 @@ def ver_cuenta():
         flash('Debes iniciar sesión para ver tu cuenta.', 'warning')
         return redirect(url_for('login'))
 
-
 # Ruta para cerrar sesión
 @app.route('/logout')
 def logout():
@@ -77,65 +76,7 @@ def inicio():
     else:
         return redirect(url_for('login'))
 
-
-@app.route('/productos')
-def productos():
-    if 'logged_in' in session:
-        # Consulta para obtener los productos desde la base de datos
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM productos")
-        productos = cur.fetchall()
-
-        # Consulta para obtener las imágenes de los productos
-        imagenes = {}
-        for producto in productos:
-            id_producto = producto[0]
-            query_imagenes = f"SELECT url_imagen FROM imagenes WHERE id_producto = {id_producto}"
-            cur.execute(query_imagenes)
-            imagenes[id_producto] = cur.fetchall()
-
-        # Consulta para obtener los descuentos de los productos
-        descuentos = {}
-        for producto in productos:
-            id_producto = producto[0]
-            query_descuentos = f"SELECT porcentaje FROM descuentos WHERE id_producto = {id_producto}"
-            cur.execute(query_descuentos)
-            descuentos[id_producto] = cur.fetchone()
-
-        # Consulta para obtener los stocks de los productos
-        stocks = {}
-        for producto in productos:
-            id_producto = producto[0]
-            cur.execute("SELECT cantidad_stock FROM stocks WHERE id_stock = %s", (producto[3],))
-            stock = cur.fetchone()
-            stocks[id_producto] = stock[0]
-
-        # Consulta para obtener las categorías de los productos
-        categorias = {}
-        for producto in productos:
-            id_producto = producto[0]
-            cur.execute("SELECT nombre_categoria FROM categorias WHERE id_categoria = %s", (producto[5],))
-            categorias[id_producto] = [row[0] for row in cur.fetchall()]
-
-        # Consulta para obtener las marcas de los productos
-        marcas = {}
-        for producto in productos:
-            id_marca = producto[4]  # Obtener el ID de la marca del producto
-            cur.execute("SELECT nombre_marca FROM marcas WHERE id_marca = %s", (id_marca,))
-            marca = cur.fetchone()
-            marcas[producto[0]] = marca[0] if marca else "Marca desconocida"  # Asociar la marca al ID del producto
-            
-        cur.close()
-
-        # Preenumerar la lista de imágenes
-        for id_producto, lista_imagenes in imagenes.items():
-            imagenes[id_producto] = list(enumerate(lista_imagenes))
-
-        return render_template('productos.html', productos=productos, imagenes=imagenes, descuentos=descuentos, stocks=stocks, categorias=categorias,marcas=marcas)
-    else:
-        flash('Debes iniciar sesión para ver los productos.', 'warning')
-        return redirect(url_for('login'))
-
+## RUTAS PARA GESTIONAR USUARIOS
 
 @app.route('/administrar_usuarios')
 def administrar_usuarios():
@@ -206,8 +147,73 @@ def eliminar_empleado(id):
         
         # Redirigir a la página de administración de usuarios
         return redirect(url_for('administrar_usuarios'))
-    
-@app.route('/agregar_producto', methods=['GET', 'POST'])
+
+## RUTAS PARA GESTIONAR PRODUCTOS
+
+@app.route('/gestionar_productos')
+def productos():
+    if 'logged_in' in session:
+        # Consulta para obtener los productos desde la base de datos
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM productos")
+        productos = cur.fetchall()
+
+        # Consulta para obtener las imágenes de los productos
+        imagenes = {}
+        for producto in productos:
+            id_producto = producto[0]
+            query_imagenes = f"SELECT url_imagen FROM imagenes WHERE id_producto = {id_producto}"
+            cur.execute(query_imagenes)
+            imagenes[id_producto] = cur.fetchall()
+
+        # Consulta para obtener los descuentos de los productos
+        descuentos = {}
+        for producto in productos:
+            id_producto = producto[0]
+            query_descuentos = f"SELECT porcentaje FROM descuentos WHERE id_producto = {id_producto}"
+            cur.execute(query_descuentos)
+            descuentos[id_producto] = cur.fetchone()
+
+        # Consulta para obtener los stocks de los productos
+        stocks = {}
+        for producto in productos:
+            id_producto = producto[0]
+            cur.execute("SELECT cantidad_stock FROM stocks WHERE id_stock = %s", (producto[3],))
+            stock = cur.fetchone()
+            stocks[id_producto] = stock[0]
+
+        # Consulta para obtener las categorías de los productos
+        categorias = {}
+        for producto in productos:
+            id_producto = producto[0]
+            cur.execute("""
+                SELECT categorias.nombre_categoria 
+                FROM categorias 
+                INNER JOIN productos ON productos.id_categoria = categorias.id_categoria
+                WHERE productos.id_producto = %s
+            """, (id_producto,))
+            categorias[id_producto] = [row[0] for row in cur.fetchall()]
+
+        # Consulta para obtener las marcas de los productos
+        marcas = {}
+        for producto in productos:
+            id_marca = producto[4]  # Obtener el ID de la marca del producto
+            cur.execute("SELECT nombre_marca FROM marcas WHERE id_marca = %s", (id_marca,))
+            marca = cur.fetchone()
+            marcas[producto[0]] = marca[0] if marca else "Marca desconocida"  # Asociar la marca al ID del producto
+            
+        cur.close()
+
+        # Preenumerar la lista de imágenes
+        for id_producto, lista_imagenes in imagenes.items():
+            imagenes[id_producto] = list(enumerate(lista_imagenes))
+
+        return render_template('gestionar_productos.html', productos=productos, imagenes=imagenes, descuentos=descuentos, stocks=stocks, categorias=categorias, marcas=marcas)
+    else:
+        flash('Debes iniciar sesión para ver los productos.', 'warning')
+        return redirect(url_for('login'))
+
+@app.route('/productos/agregar', methods=['GET', 'POST'])
 def agregar_producto():
     if request.method == 'POST':
         nombre_producto = request.form['nombre_producto']
@@ -226,9 +232,8 @@ def agregar_producto():
 
     return render_template('agregar_producto.html')
 
-
-@app.route('/editar_producto/<int:producto_id>', methods=['GET', 'POST'])
-def editar_producto(producto_id):
+@app.route('/productos/<int:id>/editar', methods=['GET', 'POST'])
+def editar_producto(id):
     if request.method == 'POST':
         # Manejar el envío del formulario para editar el producto aquí
         # Recuperar los datos del formulario, actualizar la base de datos, etc.
@@ -237,19 +242,26 @@ def editar_producto(producto_id):
     else:
         # Obtener los datos del producto existente de la base de datos
         cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM productos WHERE id_producto = %s", (producto_id,))
+        cur.execute("SELECT * FROM productos WHERE id_producto = %s", (id,))
         producto = cur.fetchone()
+
+        cur.execute("SELECT * FROM categorias")
+        categorias = cur.fetchone()
+
+        cur.execute("SELECT * FROM marcas")
+        marcas = cur.fetchone()
         cur.close()
 
         # Verificar si el producto existe
         if producto:
             # Pasar los datos del producto a la plantilla para rellenar los campos del formulario
-            return render_template('editar_producto.html', producto=producto)
+            return render_template('editar_producto.html', producto=producto,categorias=categorias,marcas=marcas)
         else:
             flash('El producto no existe', 'error')
             return redirect(url_for('productos'))
 
-        
+## RUTAS PARA GESTIONAR SITIO
+
 @app.route('/configurar_sitio', methods=['GET', 'POST'])
 def configurar_sitio():
     mensaje = None
@@ -307,82 +319,7 @@ def mostrar_sitio():
     else:
         return "La tienda no se encontró en la base de datos"
 
-@app.route('/gestionar_categorias')
-def gestionar_categorias():
-    try:
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM categorias")
-        categorias = cur.fetchall()
-        cur.close()
-        print("Categorías recuperadas:", categorias)  # Mensaje de depuración
-        return render_template('gestionar_categorias.html', categorias=categorias)
-    except Exception as e:
-        print("Error al recuperar categorías:", e)  # Mensaje de error
-        return "Error al recuperar categorías", 500
-    
-@app.route('/agregar_categoria', methods=['GET', 'POST'])
-def crear_categoria():
-    if request.method == 'POST':
-        nombre_categoria = request.form['nombre_categoria']
-        cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO categorias (nombre_categoria) VALUES (%s)", (nombre_categoria,))
-        mysql.connection.commit()
-        cur.close()
-        return redirect(url_for('gestionar_categorias'))
-    return render_template('agregar_categoria.html')
-
-@app.route('/eliminar_categoria/<int:id_categoria>', methods=['POST'])
-def eliminar_categoria(id_categoria):
-    if request.method == 'POST':
-        cur = mysql.connection.cursor()
-        cur.execute("DELETE FROM categorias WHERE id_categoria = %s", (id_categoria,))
-        mysql.connection.commit()
-
-        return redirect(url_for('gestionar_categorias'))
-    
-@app.route('/editar_categoria/<int:id_categoria>', methods=['GET', 'POST'])
-def editar_categoria(id_categoria):
-    if request.method == 'POST':
-        cur = None
-        try:
-            nombre_categoria = request.form['nombre_categoria']
-            cur = mysql.connection.cursor()
-            cur.execute("UPDATE categorias SET nombre_categoria = %s WHERE id_categoria = %s", (nombre_categoria, id_categoria))
-            mysql.connection.commit()
-            flash('Categoría editada correctamente', 'success')
-            return redirect('/gestionar_categorias')
-        except Exception as e:
-            flash('Error al editar la categoría', 'error')
-            print(e)  # Imprimir el error para depuración
-            return redirect('/gestionar_categorias')
-        finally:
-            if cur:  # Verificar si cur está definido antes de cerrarlo
-                cur.close()
-    else:
-        try:
-            cur = mysql.connection.cursor()
-            cur.execute("SELECT * FROM categorias WHERE id_categoria = %s", (id_categoria,))
-            categoria = cur.fetchone()
-            cur.close()
-
-            # Verificar si la categoría existe
-            if categoria:
-                # Pasar los datos de la categoría a la plantilla para rellenar los campos del formulario
-                return render_template('editar_categoria.html', categoria=categoria)
-            else:
-                flash('La categoría no existe', 'error')
-                return redirect('/gestionar_categorias')
-        finally:
-            if cur:  # Verificar si cur está definido antes de cerrarlo
-                cur.close()
-
-
-
-
-
-
-
-
+## RUTAS PARA GESTIONAR DESCUENTOS
 
 @app.route('/gestionar_descuentos')
 def gestionar_descuentos():
@@ -396,6 +333,9 @@ def gestionar_descuentos():
 def editar_descuento(id):
     if request.method == 'POST':
         # Capturar los datos enviados por el formulario
+        codigo_producto = request.form['codigo_producto']
+        estado_descuento = request.form['estado_descuento']
+        tipo_descuento = request.form['tipo_descuento']
         codigo = request.form['codigo']
         cantidad = request.form['cantidad']
         if cantidad:
@@ -416,9 +356,9 @@ def editar_descuento(id):
         try:
             cur.execute("""
                 UPDATE descuentos 
-                SET codigo = %s, cantidad = %s, fecha_inicio = %s, fecha_fin = %s, porcentaje = %s, descripcion = %s
+                SET id_producto = %s, id_estado_descuento =%s, codigo = %s, id_tipo_descuento = %s, cantidad = %s, fecha_inicio = %s, fecha_fin = %s, porcentaje = %s, descripcion = %s
                 WHERE id_descuento = %s
-            """, (codigo, cantidad, fecha_inicio, fecha_fin, porcentaje, descripcion, id))
+            """, (codigo_producto, estado_descuento, codigo, tipo_descuento, cantidad, fecha_inicio, fecha_fin, porcentaje, descripcion, id))
             mysql.connection.commit()
             flash('Descuento editado correctamente', 'success')
             return redirect('/gestionar_descuentos')
@@ -446,23 +386,137 @@ def editar_descuento(id):
 @app.route('/descuentos/<int:id>/eliminar', methods=['POST'])
 def eliminar_descuento(id):
     if request.method == 'POST':
-        # Conexión a la base de datos
+        if request.form.get('_method') == 'DELETE':  # Verificar si la solicitud proviene del formulario de eliminación
+            # Conexión a la base de datos
+            cur = mysql.connection.cursor()
+            try:
+                # Eliminar el registro de la tabla descuentos
+                cur.execute("DELETE FROM descuentos WHERE id_descuento = %s", (id,))
+                
+                # Confirmar la transacción
+                mysql.connection.commit()
+                
+                flash('Descuento eliminado correctamente', 'success')
+            except Exception as e:
+                flash('Error al eliminar el descuento', 'error')
+            
+            # Cerrar el cursor
+            cur.close()
+    
+    return redirect('/gestionar_descuentos')
+
+@app.route('/descuentos/agregar', methods=['GET', 'POST'])
+def agregar_descuento():
+    if request.method == 'POST':
+        codigo_producto = request.form['codigo_producto']
+        estado_descuento = request.form['estado_descuento']
+        tipo_descuento = request.form['tipo_descuento']
+        codigo = request.form['codigo']
+        cantidad = request.form['cantidad']
+        cantidad = int(cantidad) if cantidad else None
+        fecha_inicio = request.form['fecha_inicio']
+        fecha_fin = request.form['fecha_fin']
+        porcentaje = request.form['porcentaje']
+        porcentaje = int(porcentaje) if porcentaje else None
+        descripcion = request.form['descripcion']
+
+        # Obtener las categorías desde la base de datos
+        cur = mysql.connection.cursor()
+        try:
+            cur.execute("INSERT INTO descuentos (id_producto, id_estado_descuento, codigo, id_tipo_descuento, cantidad, fecha_inicio, fecha_fin, porcentaje, descripcion) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (codigo_producto, estado_descuento, codigo, tipo_descuento, cantidad, fecha_inicio, fecha_fin, porcentaje, descripcion))
+            mysql.connection.commit()
+            flash('Descuento agregado correctamente', 'success')
+            return redirect('/gestionar_descuentos')
+        except Exception as e:
+            flash('Error al agregar el descuento', 'error')
+            print(e)  # Imprimir el error para depuración
+            return redirect('/gestionar_descuentos')
+        finally:
+            cur.close()
+
+    return render_template('agregar_descuento.html')
+
+## RUTAS PARA GESTIONAR CATEGORIAS
+
+@app.route('/gestionar_categorias')
+def gestionar_categorias():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM categorias")
+    categorias = cur.fetchall()
+    cur.close()
+    return render_template('gestionar_categorias.html', categorias=categorias)
+
+@app.route('/categorias/<int:id>/editar', methods=['GET', 'POST'])
+def editar_categoria(id):
+    if request.method == 'POST':
+        nombre_categoria = request.form['nombre_categoria']
+        
+        # Actualizar el descuento en la base de datos
+        cur = mysql.connection.cursor()
+        try:
+            cur.execute("UPDATE categorias SET nombre_categoria = %s WHERE id_categoria = %s", (nombre_categoria, id))
+            mysql.connection.commit()
+            flash('categoria editada correctamente', 'success')
+            return redirect('/gestionar_categorias')
+        except Exception as e:
+            flash('Error al editar la categoria', 'error')
+            print(e)
+            return redirect('/gestionar_categorias')
+        finally:
+            cur.close()
+    else:
+        # Obtener los datos del descuento existente de la base de datos
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM categorias WHERE id_categoria = %s", (id,))
+        categoria = cur.fetchone()
+        cur.close()
+
+        if categoria:
+            return render_template('editar_categoria.html', categoria=categoria)
+        else:
+            flash('La categoria no existe', 'error')
+            return redirect('/gestionar_categorias')
+
+@app.route('/categorias/<int:id>/eliminar', methods=['POST'])
+def eliminar_categoria(id):
+    if request.method == 'POST':
         cur = mysql.connection.cursor()
         try:
             # Eliminar el registro de la tabla descuentos
-            cur.execute("DELETE FROM descuentos WHERE id_descuento = %s", (id,))
+            cur.execute("DELETE FROM categorias WHERE id_categoria = %s", (id,))
             
             # Confirmar la transacción
             mysql.connection.commit()
             
-            flash('Descuento eliminado correctamente', 'success')
+            flash('Categoria eliminada correctamente', 'success')
         except Exception as e:
-            flash('Error al eliminar el descuento', 'error')
+            flash('Error al eliminar la categoria', 'error')
         
         # Cerrar el cursor
         cur.close()
     
-    return redirect('/gestionar_descuentos')
+    return redirect('/gestionar_categorias')
+
+@app.route('/categorias/agregar', methods=['GET', 'POST'])
+def agregar_categoria():
+    if request.method == 'POST':
+        nombre_categoria = request.form['nombre_categoria']
+
+        # Obtener las categorías desde la base de datos
+        cur = mysql.connection.cursor()
+        try:
+            cur.execute("INSERT INTO categorias (nombre_categoria) VALUES (%s)", (nombre_categoria,))
+            mysql.connection.commit()
+            flash('categoria agregada correctamente', 'success')
+            return redirect('/gestionar_categorias')
+        except Exception as e:
+            flash('Error al agregar la categoria', 'error')
+            print(e)  # Imprimir el error para depuración
+            return redirect('/gestionar_categorias')
+        finally:
+            cur.close()
+
+    return render_template('agregar_categoria.html')
 
 
 if __name__ == '__main__':

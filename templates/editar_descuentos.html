@@ -11,7 +11,19 @@
         <h1>Editar Descuento</h1>
         <form method="POST">
             <div class="form-group">
-                <label for="codigo">Código Producto:</label>
+                <label for="codigo_producto">Código de Producto:</label>
+                <input type="text" class="form-control" id="codigo_producto" name="codigo_producto" value="{{ descuento[1] }}">
+            </div>
+            <div class="form-group">
+                <label for="estado_descuento">Estado Descuento:</label>
+                <input type="text" class="form-control" id="estado_descuento" name="estado_descuento" value="{{ descuento[2] }}">
+            </div>
+            <div class="form-group">
+                <label for="tipo_descuento">Tipo Descuento:</label>
+                <input type="text" class="form-control" id="tipo_descuento" name="tipo_descuento" value="{{ descuento[3] }}">
+            </div>
+            <div class="form-group">
+                <label for="codigo">Código:</label>
                 <input type="text" class="form-control" id="codigo" name="codigo" value="{{ descuento[4] }}">
             </div>
             <div class="form-group">
