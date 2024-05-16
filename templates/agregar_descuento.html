@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Descuento</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Editar Descuento</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label for="codigo">Código Producto:</label>
+                <input type="text" class="form-control" id="codigo" name="codigo" value="{{ descuento[4] }}">
+            </div>
+            <div class="form-group">
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" class="form-control" id="cantidad" name="cantidad" value="{{ descuento[5] }}">
+            </div>
+            <div class="form-group">
+                <label for="fecha_inicio">Fecha de Inicio:</label>
+                <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" value="{{ descuento[6] }}">
+            </div>
+            <div class="form-group">
+                <label for="fecha_fin">Fecha de Fin:</label>
+                <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" value="{{ descuento[7] }}">
+            </div>
+            <div class="form-group">
+                <label for="porcentaje">Porcentaje:</label>
+                <input type="number" class="form-control" id="porcentaje" name="porcentaje" value="{{ descuento[8] }}">
+            </div>
+            <div class="form-group">
+                <label for="descripcion">Descripción:</label>
+                <input type="text" class="form-control" id="descripcion" name="descripcion" value="{{ descuento[9] }}">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a href="/gestionar_descuentos" class="btn btn-primary">Regresar a Descuentos</a>
+        </form>
+    </div>
+</body>
+</html>

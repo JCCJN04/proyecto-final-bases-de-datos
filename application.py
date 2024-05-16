@@ -337,31 +337,44 @@ def eliminar_categoria(id_categoria):
         cur = mysql.connection.cursor()
         cur.execute("DELETE FROM categorias WHERE id_categoria = %s", (id_categoria,))
         mysql.connection.commit()
-        cur.close()
-        return redirect(url_for('gestionar_categorias'))
 
+        return redirect(url_for('gestionar_categorias'))
+    
 @app.route('/editar_categoria/<int:id_categoria>', methods=['GET', 'POST'])
 def editar_categoria(id_categoria):
-    
     if request.method == 'POST':
-        # Manejar el envío del formulario para editar el producto aquí
-        # Recuperar los datos del formulario, actualizar la base de datos, etc.
-        flash('Producto editado correctamente', 'success')
-        return redirect(url_for('gestionar_categorias'))
+        cur = None
+        try:
+            nombre_categoria = request.form['nombre_categoria']
+            cur = mysql.connection.cursor()
+            cur.execute("UPDATE categorias SET nombre_categoria = %s WHERE id_categoria = %s", (nombre_categoria, id_categoria))
+            mysql.connection.commit()
+            flash('Categoría editada correctamente', 'success')
+            return redirect('/gestionar_categorias')
+        except Exception as e:
+            flash('Error al editar la categoría', 'error')
+            print(e)  # Imprimir el error para depuración
+            return redirect('/gestionar_categorias')
+        finally:
+            if cur:  # Verificar si cur está definido antes de cerrarlo
+                cur.close()
     else:
-        # Obtener los datos del producto existente de la base de datos
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT * FROM categorias WHERE id_categoria = %s", (id_categoria,))
-        categoria = cur.fetchall()
-        cur.close()
+        try:
+            cur = mysql.connection.cursor()
+            cur.execute("SELECT * FROM categorias WHERE id_categoria = %s", (id_categoria,))
+            categoria = cur.fetchone()
+            cur.close()
 
-        # Verificar si el producto existe
-        if categoria:
-            # Pasar los datos del producto a la plantilla para rellenar los campos del formulario
-            return render_template('editar_categoria.html', categoria=categoria)
-        else:
-            flash('La categoria no existe', 'error')
-            return redirect(url_for('gestionar_categorias'))
+            # Verificar si la categoría existe
+            if categoria:
+                # Pasar los datos de la categoría a la plantilla para rellenar los campos del formulario
+                return render_template('editar_categoria.html', categoria=categoria)
+            else:
+                flash('La categoría no existe', 'error')
+                return redirect('/gestionar_categorias')
+        finally:
+            if cur:  # Verificar si cur está definido antes de cerrarlo
+                cur.close()
 
 
 
@@ -379,28 +392,56 @@ def gestionar_descuentos():
     cur.close()
     return render_template('gestionar_descuentos.html', descuentos=descuentos)
 
-@app.route('/descuentos/<int:id>/editar')
+@app.route('/descuentos/<int:id>/editar', methods=['GET', 'POST'])
 def editar_descuento(id):
-    
     if request.method == 'POST':
-        # Manejar el envío del formulario para editar el producto aquí
-        # Recuperar los datos del formulario, actualizar la base de datos, etc.
-        flash('Producto editado correctamente', 'success')
-        return redirect(url_for('gestionar_descuentos'))
+        # Capturar los datos enviados por el formulario
+        codigo = request.form['codigo']
+        cantidad = request.form['cantidad']
+        if cantidad:
+            cantidad = int(cantidad)
+        else:
+            cantidad = None
+        fecha_inicio = request.form['fecha_inicio']
+        fecha_fin = request.form['fecha_fin']
+        porcentaje = request.form['porcentaje']
+        if porcentaje:
+            porcentaje = int(porcentaje)
+        else:
+            porcentaje = None
+        descripcion = request.form['descripcion']
+        
+        # Actualizar el descuento en la base de datos
+        cur = mysql.connection.cursor()
+        try:
+            cur.execute("""
+                UPDATE descuentos 
+                SET codigo = %s, cantidad = %s, fecha_inicio = %s, fecha_fin = %s, porcentaje = %s, descripcion = %s
+                WHERE id_descuento = %s
+            """, (codigo, cantidad, fecha_inicio, fecha_fin, porcentaje, descripcion, id))
+            mysql.connection.commit()
+            flash('Descuento editado correctamente', 'success')
+            return redirect('/gestionar_descuentos')
+        except Exception as e:
+            flash('Error al editar el descuento', 'error')
+            print(e)  # Imprimir el error para depuración
+            return redirect('/gestionar_descuentos')
+        finally:
+            cur.close()
     else:
-        # Obtener los datos del producto existente de la base de datos
+        # Obtener los datos del descuento existente de la base de datos
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM descuentos WHERE id_descuento = %s", (id,))
         descuento = cur.fetchone()
         cur.close()
 
-        # Verificar si el producto existe
+        # Verificar si el descuento existe
         if descuento:
-            # Pasar los datos del producto a la plantilla para rellenar los campos del formulario
+            # Pasar los datos del descuento a la plantilla para rellenar los campos del formulario
             return render_template('editar_descuentos.html', descuento=descuento)
         else:
-            flash('El producto no existe', 'error')
-            return redirect(url_for('gestionar_descuentos'))
+            flash('El descuento no existe', 'error')
+            return redirect('/gestionar_descuentos')
 
 @app.route('/descuentos/<int:id>/eliminar', methods=['POST'])
 def eliminar_descuento(id):
