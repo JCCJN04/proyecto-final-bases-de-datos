@@ -270,32 +270,21 @@ def editar_producto(id):
     if request.method == 'POST':
         nombre_producto = request.form['nombre_producto']
         descripcion_producto = request.form['descripcion_producto']
-        categoria_producto = request.form['categoria_producto']
+        id_categoria = request.form['categoria_producto']
         precio_venta = request.form['precio_venta']
         precio_compra = request.form['precio_compra']
-        marca_producto = request.form['marca_producto']
+        id_marca = request.form['marca_producto']
 
-        cur.execute("SELECT id_marca FROM marcas WHERE nombre_marca = %s", (marca_producto,))
-        marca = cur.fetchone()
-        id_marca = marca[0] if marca else None
+        cur.execute("""
+            UPDATE productos 
+            SET nombre_producto = %s, descripcion_producto = %s, id_marca = %s, id_categoria = %s
+            WHERE id_producto = %s
+        """, (nombre_producto, descripcion_producto, id_marca, id_categoria, id))
 
-        cur.execute("SELECT id_categoria FROM categorias WHERE nombre_categoria = %s", (categoria_producto,))
-        categoria = cur.fetchone()
-        id_categoria = categoria[0] if categoria else None
-
-        if id_marca and id_categoria:
-            cur.execute("""
-                UPDATE productos 
-                SET nombre_producto = %s, descripcion_producto = %s, id_marca = %s, id_categoria = %s, precio_venta = %s, precio_compra = %s
-                WHERE id_producto = %s
-            """, (nombre_producto, descripcion_producto, id_marca, id_categoria, precio_venta, precio_compra, id))
-            
-            mysql.connection.commit()
-            flash('Producto editado correctamente', 'success')
-        else:
-            flash('Error al actualizar el producto. Verifique los datos ingresados.', 'error')
-
+        mysql.connection.commit()
         cur.close()
+
+        flash('Producto editado correctamente', 'success')
         return redirect('/gestionar_productos')
     else:
         cur.execute("SELECT * FROM productos WHERE id_producto = %s", (id,))
@@ -325,6 +314,7 @@ def editar_producto(id):
         else:
             flash('El producto no existe', 'error')
             return redirect('/gestionar_productos')
+
 
 @app.route('/productos/<int:id_producto>/imagenes', methods=['GET', 'POST'])
 def administrar_imagenes_producto(id_producto):
@@ -379,6 +369,7 @@ def eliminar_imagen():
 
 
 ## RUTAS PARA GESTIONAR SITIO
+
 @app.route('/configurar_sitio', methods=['GET', 'POST'])
 def configurar_sitio():
     mensaje = None
@@ -459,8 +450,6 @@ def editar_descuento(id):
             cantidad = int(cantidad)
         else:
             cantidad = None
-        fecha_inicio = request.form['fecha_inicio']
-        fecha_fin = request.form['fecha_fin']
         porcentaje = request.form['porcentaje']
         if porcentaje:
             porcentaje = int(porcentaje)
@@ -633,6 +622,19 @@ def agregar_categoria():
             cur.close()
 
     return render_template('agregar_categoria.html')
+
+## RUTAS PARA GESTIONAR PEDIDOS
+
+
+@app.route('/administrar_pedidos')
+def administrar_pedidos():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT pedidos.id_pedido, CONCAT(clientes.nombre, ' ', clientes.apellido), estado_pedidos.nombre FROM pedidos JOIN clientes ON pedidos.id_cliente = clientes.id_cliente JOIN estado_pedidos ON pedidos.id_estado_pedido = estado_pedidos.id_estado_pedido")
+    pedidos = cur.fetchall()
+    cur.execute("SELECT * FROM estado_pedidos")
+    estados_pedidos = cur.fetchall()
+    cur.close()
+    return render_template('administrar_pedidos.html', pedidos=pedidos, estados_pedidos=estados_pedidos)
 
 
 if __name__ == '__main__':
