@@ -12,43 +12,43 @@
         <form method="POST">
             <div class="form-group" style="display: none;">
                 <label for="id_tienda">ID de la tienda:</label>
-                <input type="text" class="form-control" id="id_tienda" name="id_tienda" value="1" readonly>
+                <input type="text" class="form-control" id="id_tienda" name="id_tienda" value="{{ tienda[0] }}">
             </div>
             <div class="form-group">
                 <label for="nombre_tienda">Nombre de la tienda:</label>
-                <input type="text" class="form-control" id="nombre_tienda" name="nombre_tienda" value="{{ tienda.nombre_tienda }}">
+                <input type="text" class="form-control" id="nombre_tienda" name="nombre_tienda" value="{{ tienda[1] }}">
             </div>
             <div class="form-group">
                 <label for="calle">Calle:</label>
-                <input type="text" class="form-control" id="calle" name="calle" value="{{ tienda.calle }}">
+                <input type="text" class="form-control" id="calle" name="calle" value="{{ tienda[2] }}">
             </div>
             <div class="form-group">
                 <label for="colonia">Colonia:</label>
-                <input type="text" class="form-control" id="colonia" name="colonia" value="{{ tienda.colonia }}">
+                <input type="text" class="form-control" id="colonia" name="colonia" value="{{ tienda[3] }}">
             </div>
             <div class="form-group">
                 <label for="codigo_postal">Código Postal:</label>
-                <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" value="{{ tienda.codigo_postal }}">
+                <input type="text" class="form-control" id="codigo_postal" name="codigo_postal" value="{{ tienda[4] }}">
             </div>
             <div class="form-group">
                 <label for="ciudad">Ciudad:</label>
-                <input type="text" class="form-control" id="ciudad" name="ciudad" value="{{ tienda.ciudad }}">
+                <input type="text" class="form-control" id="ciudad" name="ciudad" value="{{ tienda[5] }}">
             </div>
             <div class="form-group">
                 <label for="estado">Estado:</label>
-                <input type="text" class="form-control" id="estado" name="estado" value="{{ tienda.estado }}">
+                <input type="text" class="form-control" id="estado" name="estado" value="{{ tienda[6] }}">
             </div>
             <div class="form-group">
                 <label for="pais">País:</label>
-                <input type="text" class="form-control" id="pais" name="pais" value="{{ tienda.pais }}">
+                <input type="text" class="form-control" id="pais" name="pais" value="{{ tienda[7] }}">
             </div>
             <div class="form-group">
                 <label for="telefono">Teléfono:</label>
-                <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ tienda.telefono }}">
+                <input type="tel" class="form-control" id="telefono" name="telefono" value="{{ tienda[8] }}">
             </div>
             <div class="form-group">
                 <label for="email">Correo Electrónico:</label>
-                <input type="email" class="form-control" id="email" name="email" value="{{ tienda.email }}">
+                <input type="email" class="form-control" id="email" name="email" value="{{ tienda[9] }}">
             </div>
             <button type="submit" class="btn btn-primary">Guardar Configuración</button>
             <a href="/mostrar_sitio" class="btn btn-secondary">Regresar a Mostrar Sitio</a>

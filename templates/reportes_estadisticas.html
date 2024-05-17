@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes y Estadísticas</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Reportes y Estadísticas</h1>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h2>Ventas por Cliente</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Total de Compras</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ventasPorClienteBody">
+                        <!-- Aquí se cargarán los datos de ventas por cliente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para cargar los datos de ventas por cliente desde el servidor
+        function cargarVentasPorCliente() {
+            fetch('/obtener_ventas_por_cliente')
+            .then(response => response.json())
+            .then(data => {
+                const ventasPorClienteBody = document.getElementById('ventasPorClienteBody');
+                ventasPorClienteBody.innerHTML = '';
+                data.forEach(cliente => {
+                    const fila = document.createElement('tr');
+                    fila.innerHTML = `
+                        <td>${cliente.nombre} ${cliente.apellido}</td>
+                        <td>${cliente.total_compras}</td>
+                    `;
+                    ventasPorClienteBody.appendChild(fila);
+                });
+            });
+        }
+
+        // Cargar los datos al cargar la página
+        window.onload = function() {
+            cargarVentasPorCliente();
+        };
+    </script>
+</body>
+</html>

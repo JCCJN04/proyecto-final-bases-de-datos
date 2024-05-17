@@ -10,7 +10,7 @@ app.secret_key = 'clave_secreta'
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'usr_01'
 app.config['MYSQL_PASSWORD'] = '666'
-app.config['MYSQL_DB'] = 'proyectofinalbd'
+app.config['MYSQL_DB'] = 'sqlproyectofinalalex'
 
 print("Conexión exitosa")
 
@@ -256,13 +256,6 @@ def eliminar_producto(id):
             cur.close()
     return redirect('/gestionar_productos')
 
-
-
-
-
-
-
-
 @app.route('/productos/<int:id>/editar', methods=['GET', 'POST'])
 def editar_producto(id):
     cur = mysql.connection.cursor()
@@ -273,6 +266,7 @@ def editar_producto(id):
         id_categoria = request.form['categoria_producto']
         id_marca = request.form['marca_producto']
         stock = request.form['stock']
+        precio = request.form['precio']
         
         if stock:
             stock = int(stock)
@@ -282,9 +276,9 @@ def editar_producto(id):
         # Actualización de productos
         cur.execute("""
             UPDATE productos 
-            SET nombre_producto = %s, descripcion_producto = %s, id_marca = %s, id_categoria = %s 
+            SET nombre_producto = %s, descripcion_producto = %s, id_marca = %s, id_categoria = %s, precio = %s
             WHERE id_producto = %s
-        """, (nombre_producto, descripcion_producto, id_marca, id_categoria, id))
+        """, (nombre_producto, descripcion_producto, id_marca, id_categoria, precio, id))
 
         # Obtener id_stock del producto
         cur.execute("SELECT id_stock FROM productos WHERE id_producto = %s", (id,))
@@ -333,6 +327,28 @@ def editar_producto(id):
             flash('El producto no existe', 'error')
             return redirect('/gestionar_productos')
 
+@app.route('/pedidos/<int:pedido_id>/actualizar_estado', methods=['POST'])
+def actualizar_estado_pedido(pedido_id):
+    nuevo_estado = request.form['nuevo_estado']
+    
+    cursor = mysql.connection.cursor()
+    
+    try:
+        cursor.execute("""
+            UPDATE pedidos
+            SET id_estado_pedido = %s
+            WHERE id_pedido = %s
+        """, (nuevo_estado, pedido_id))
+        
+        mysql.connection.commit()
+        flash('El estado del pedido ha sido actualizado con éxito.', 'success')
+    except Exception as e:
+        mysql.connection.rollback()
+        flash(f'Error al actualizar el estado del pedido: {e}', 'danger')
+    finally:
+        cursor.close()
+    
+    return redirect(url_for('administrar_pedidos'))
 
 
 
@@ -431,7 +447,7 @@ def configurar_sitio():
         
         # Configurar mensaje de cambio exitoso
         flash('Cambio exitoso', 'success')
-        return redirect(url_for('configurar_sitio'))
+        return redirect('/mostrar_sitio')
 
     # Si es un método GET o POST, renderiza el formulario con los datos de la tienda
     return render_template('configurar_sitio.html', tienda=tienda, mensaje=mensaje)
@@ -700,6 +716,10 @@ def detalle_pedido(id_pedido):
     cur.close()
 
     return render_template('detalle_pedidos.html', pedido=pedido, productos_pedido=productos_pedido)
+
+@app.route('/reportes_estadisticas')
+def reportes_estadisticas():
+    return render_template('reportes_estadisticas.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
