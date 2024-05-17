@@ -5,51 +5,115 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportes y Estadísticas</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
 </head>
 <body>
     <div class="container mt-5">
         <h1>Reportes y Estadísticas</h1>
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <h2>Ventas por Cliente</h2>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Total de Compras</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ventasPorClienteBody">
-                        <!-- Aquí se cargarán los datos de ventas por cliente -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <h2>Reporte de ventas</h2>
+        
+        <!-- Tabla de ventas -->
+        <table class="table table-striped mt-4">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Ventas</th>
+                    <th>Ingresos ($)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venta in ventas %}
+                <tr>
+                    <td>{{ venta.producto }}</td>
+                    <td>{{ venta.ventas }}</td>
+                    <td>{{ venta.ingresos }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Contenedor del gráfico -->
+        <div id="container" style="width:100%; height:400px;"></div>
+        <div id="container" style="width:100%; height:400px;"></div>
     </div>
 
     <script>
-        // Función para cargar los datos de ventas por cliente desde el servidor
-        function cargarVentasPorCliente() {
-            fetch('/obtener_ventas_por_cliente')
-            .then(response => response.json())
-            .then(data => {
-                const ventasPorClienteBody = document.getElementById('ventasPorClienteBody');
-                ventasPorClienteBody.innerHTML = '';
-                data.forEach(cliente => {
-                    const fila = document.createElement('tr');
-                    fila.innerHTML = `
-                        <td>${cliente.nombre} ${cliente.apellido}</td>
-                        <td>${cliente.total_compras}</td>
-                    `;
-                    ventasPorClienteBody.appendChild(fila);
-                });
+        document.addEventListener('DOMContentLoaded', function () {
+            Highcharts.chart('container', {
+                title: {
+                    text: 'Productos Vendidos por Mes',
+                    align: 'left'
+                },
+                yAxis: {
+                    title: {
+                        text: 'Number of Employees'
+                    }
+                },
+                xAxis: {
+                    accessibility: {
+                        rangeDescription: 'Range: 2010 to 2020'
+                    }
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'middle'
+                },
+                plotOptions: {
+                    series: {
+                        label: {
+                            connectorAllowed: false
+                        },
+                        pointStart: 2010
+                    }
+                },
+                series: [{
+                    name: 'Installation & Developers',
+                    data: [
+                        43934, 48656, 65165, 81827, 112143, 142383,
+                        171533, 165174, 155157, 161454, 154610
+                    ]
+                }, {
+                    name: 'Manufacturing',
+                    data: [
+                        24916, 37941, 29742, 29851, 32490, 30282,
+                        38121, 36885, 33726, 34243, 31050
+                    ]
+                }, {
+                    name: 'Sales & Distribution',
+                    data: [
+                        11744, 30000, 16005, 19771, 20185, 24377,
+                        32147, 30912, 29243, 29213, 25663
+                    ]
+                }, {
+                    name: 'Operations & Maintenance',
+                    data: [
+                        null, null, null, null, null, null, null,
+                        null, 11164, 11218, 10077
+                    ]
+                }, {
+                    name: 'Other',
+                    data: [
+                        21908, 5548, 8105, 11248, 8989, 11816, 18274,
+                        17300, 13053, 11906, 10073
+                    ]
+                }],
+                responsive: {
+                    rules: [{
+                        condition: {
+                            maxWidth: 500
+                        },
+                        chartOptions: {
+                            legend: {
+                                layout: 'horizontal',
+                                align: 'center',
+                                verticalAlign: 'bottom'
+                            }
+                        }
+                    }]
+                }
             });
-        }
-
-        // Cargar los datos al cargar la página
-        window.onload = function() {
-            cargarVentasPorCliente();
-        };
+        });
     </script>
 </body>
 </html>

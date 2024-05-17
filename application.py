@@ -492,15 +492,17 @@ def editar_descuento(id):
         else:
             porcentaje = None
         descripcion = request.form['descripcion']
+        fecha_inicio = request.form['fecha_inicio']
+        fecha_fin = request.form['fecha_fin']
         
         # Actualizar el descuento en la base de datos
         cur = mysql.connection.cursor()
         try:
             cur.execute("""
                 UPDATE descuentos 
-                SET id_producto = %s, id_estado_descuento =%s, codigo = %s, id_tipo_descuento = %s, cantidad = %s, fecha_inicio = %s, fecha_fin = %s, porcentaje = %s, descripcion = %s
+                SET id_producto = %s, id_estado_descuento = %s, codigo = %s, id_tipo_descuento = %s, cantidad = %s, fecha_inicio = %s, fecha_fin = %s, porcentaje = %s, descripcion = %s
                 WHERE id_descuento = %s
-            """, (codigo_producto, estado_descuento, codigo, tipo_descuento, cantidad, porcentaje, descripcion, id))
+            """, (codigo_producto, estado_descuento, codigo, tipo_descuento, cantidad, fecha_inicio, fecha_fin, porcentaje, descripcion, id))
             mysql.connection.commit()
             flash('Descuento editado correctamente', 'success')
             return redirect('/gestionar_descuentos')
@@ -524,6 +526,7 @@ def editar_descuento(id):
         else:
             flash('El descuento no existe', 'error')
             return redirect('/gestionar_descuentos')
+
 
 
 @app.route('/descuentos/<int:id>/eliminar', methods=['POST'])
@@ -694,7 +697,7 @@ def detalle_pedido(id_pedido):
 
     # Obtener los detalles del pedido
     cur.execute("""
-        SELECT pedidos.id_pedido, pedidos.id_cliente, clientes.nombre, clientes.apellido, estado_pedidos.nombre 
+        SELECT pedidos.id_pedido, pedidos.id_cliente, clientes.nombre, clientes.apellido, estado_pedidos.nombre
         FROM pedidos 
         JOIN clientes ON pedidos.id_cliente = clientes.id_cliente 
         JOIN estado_pedidos ON pedidos.id_estado_pedido = estado_pedidos.id_estado_pedido 
@@ -704,10 +707,9 @@ def detalle_pedido(id_pedido):
 
     # Obtener los productos asociados al pedido
     cur.execute("""
-        SELECT productos.nombre_producto, productos.descripcion_producto, precios.precio_venta, marcas.nombre_marca, detalle_pedidos.cantidad 
+        SELECT productos.nombre_producto, productos.descripcion_producto, productos.precio, marcas.nombre_marca, detalle_pedidos.cantidad
         FROM detalle_pedidos 
-        JOIN productos ON detalle_pedidos.id_producto = productos.id_producto 
-        JOIN precios ON productos.id_producto = precios.id_producto 
+        JOIN productos ON detalle_pedidos.id_producto = productos.id_producto  
         JOIN marcas ON productos.id_marca = marcas.id_marca 
         WHERE detalle_pedidos.id_pedido = %s
     """, (id_pedido,))
@@ -717,9 +719,17 @@ def detalle_pedido(id_pedido):
 
     return render_template('detalle_pedidos.html', pedido=pedido, productos_pedido=productos_pedido)
 
+
 @app.route('/reportes_estadisticas')
 def reportes_estadisticas():
-    return render_template('reportes_estadisticas.html')
+    # Datos de ventas para la tabla (esto normalmente vendría de una base de datos)
+    ventas = [
+        {'producto': 'Panel Solar A', 'ventas': 120, 'ingresos': 3000},
+        {'producto': 'Panel Solar B', 'ventas': 85, 'ingresos': 2200},
+        {'producto': 'Panel Solar C', 'ventas': 45, 'ingresos': 1500},
+        {'producto': 'Panel Solar D', 'ventas': 30, 'ingresos': 800},
+    ]
+    return render_template('reportes_estadisticas.html', ventas=ventas)
 
 if __name__ == '__main__':
     app.run(debug=True)

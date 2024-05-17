@@ -1,1 +1,1 @@
-app.config['MYSQL_PASSWORD'] = 'sqlproyectofinalalex'
+detalle_pedidos
