@@ -17,7 +17,7 @@
                         <div class="carousel-inner">
                             {% for index, imagen in imagenes[producto[0]] %}
                             <div class="carousel-item {% if index == 0 %}active{% endif %}">
-                                <img src="{{ imagen[1] }}" class="d-block w-100" alt="...">
+                                <img src="{{ imagen[0] }}" class="card-img-top" alt="Imagen del producto">
                             </div>
                             {% endfor %}
                         </div>
@@ -42,21 +42,20 @@
                         <p class="card-text">Marca: {{ marcas[producto[0]] }}</p> 
                         
                         <a href="/productos/{{ producto[0] }}/editar" class="btn btn-primary">Editar</a>
-                        <a href="/productos/{{ producto[0] }}/eliminar" class="btn btn-danger" onclick="event.preventDefault(); document.getElementById('delete-form').submit();">Eliminar</a>
-                        <form id="delete-form" action="/productos/{{ productos[0] }}/eliminar" method="POST" style="display: none;">
+                        <a href="/productos/{{ producto[0] }}/imagenes" class="btn btn-primary">Editar Imágenes</a>
+                        <form id="delete-form-{{ producto[0] }}" action="/productos/{{ producto[0] }}/eliminar" method="POST" style="display: inline;">
                             <input type="hidden" name="_method" value="DELETE">
-                            <!-- Puedes incluir más campos ocultos aquí si es necesario -->
+                            <button type="submit" class="btn btn-danger">Eliminar</button>
                         </form> 
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
-                <!-- Botón para agregar un nuevo descuento -->
-                <a href="/productos/agregar" class="btn btn-primary">Agregar Producto</a>
-
-                <!-- Botón para regresar a la página de inicio -->
-                <a href="/" class="btn btn-secondary">Regresar a Inicio</a>
+        <!-- Botón para agregar un nuevo producto -->
+        <a href="/productos/agregar" class="btn btn-primary">Agregar Producto</a>
+        <!-- Botón para regresar a la página de inicio -->
+        <a href="/" class="btn btn-secondary">Regresar a Inicio</a>
     </div>
 </body>
 </html>

@@ -4,7 +4,7 @@ from flask_mysqldb import MySQL
 app = Flask(__name__)
 mysql = MySQL(app)
 
-app.secret_key = 'tu_clave_secreta_aqui'  # Reemplaza 'tu_clave_secreta_aqui' por una cadena secreta única
+app.secret_key = 'clave_secreta' 
 
 # DATOS PARA CONECTARME A MI BASE DE DATOS
 app.config['MYSQL_HOST'] = 'localhost'
@@ -122,7 +122,7 @@ def agregar_usuario():
 
     return render_template('agregar_usuario.html')
 
-@app.route('/eliminar_empleado/<int:id>', methods=['POST'])
+@app.route('/eliminar_usuario/<int:id>', methods=['POST'])
 def eliminar_empleado(id):
     if request.method == 'POST':
         # Conexión a la base de datos
@@ -232,36 +232,153 @@ def agregar_producto():
 
     return render_template('agregar_producto.html')
 
+@app.route('/productos/<int:id>/eliminar', methods=['POST'])
+def eliminar_producto(id):
+    if request.method == 'POST':
+        # Conexión a la base de datos
+        cur = mysql.connection.cursor()
+        try:
+            # Eliminar los registros relacionados en otras tablas
+            cur.execute("DELETE FROM descuentos WHERE id_producto = %s", (id,))
+            cur.execute("DELETE FROM detalle_carritos WHERE id_producto = %s", (id,))
+            cur.execute("DELETE FROM detalle_pedidos WHERE id_producto = %s", (id,))
+            cur.execute("DELETE FROM imagenes WHERE id_producto = %s", (id,))
+            cur.execute("DELETE FROM imagen_resenas WHERE id_resena IN (SELECT id_resena FROM resenas WHERE id_producto = %s)", (id,))
+            cur.execute("DELETE FROM resenas WHERE id_producto = %s", (id,))
+            # Luego eliminar el producto de la tabla productos
+            cur.execute("DELETE FROM productos WHERE id_producto = %s", (id,))
+            # Confirmar la transacción
+            mysql.connection.commit()
+            flash('Producto eliminado correctamente', 'success')
+        except Exception as e:
+            flash(f'Error al eliminar el producto: {str(e)}', 'error')
+        finally:
+            cur.close()
+    return redirect('/gestionar_productos')
+
+
+
+
+
+
+
+
 @app.route('/productos/<int:id>/editar', methods=['GET', 'POST'])
 def editar_producto(id):
+    cur = mysql.connection.cursor()
+
     if request.method == 'POST':
-        # Manejar el envío del formulario para editar el producto aquí
-        # Recuperar los datos del formulario, actualizar la base de datos, etc.
-        flash('Producto editado correctamente', 'success')
-        return redirect(url_for('productos'))
+        nombre_producto = request.form['nombre_producto']
+        descripcion_producto = request.form['descripcion_producto']
+        categoria_producto = request.form['categoria_producto']
+        precio_venta = request.form['precio_venta']
+        precio_compra = request.form['precio_compra']
+        marca_producto = request.form['marca_producto']
+
+        cur.execute("SELECT id_marca FROM marcas WHERE nombre_marca = %s", (marca_producto,))
+        marca = cur.fetchone()
+        id_marca = marca[0] if marca else None
+
+        cur.execute("SELECT id_categoria FROM categorias WHERE nombre_categoria = %s", (categoria_producto,))
+        categoria = cur.fetchone()
+        id_categoria = categoria[0] if categoria else None
+
+        if id_marca and id_categoria:
+            cur.execute("""
+                UPDATE productos 
+                SET nombre_producto = %s, descripcion_producto = %s, id_marca = %s, id_categoria = %s, precio_venta = %s, precio_compra = %s
+                WHERE id_producto = %s
+            """, (nombre_producto, descripcion_producto, id_marca, id_categoria, precio_venta, precio_compra, id))
+            
+            mysql.connection.commit()
+            flash('Producto editado correctamente', 'success')
+        else:
+            flash('Error al actualizar el producto. Verifique los datos ingresados.', 'error')
+
+        cur.close()
+        return redirect('/gestionar_productos')
     else:
-        # Obtener los datos del producto existente de la base de datos
-        cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM productos WHERE id_producto = %s", (id,))
         producto = cur.fetchone()
 
         cur.execute("SELECT * FROM categorias")
-        categorias = cur.fetchone()
+        categorias = cur.fetchall()
 
         cur.execute("SELECT * FROM marcas")
-        marcas = cur.fetchone()
+        marcas = cur.fetchall()
+
         cur.close()
 
-        # Verificar si el producto existe
         if producto:
-            # Pasar los datos del producto a la plantilla para rellenar los campos del formulario
-            return render_template('editar_producto.html', producto=producto,categorias=categorias,marcas=marcas)
+            id_marca = producto[3]
+            id_categoria = producto[4]
+
+            cur = mysql.connection.cursor()
+            cur.execute("SELECT nombre_marca FROM marcas WHERE id_marca = %s", (id_marca,))
+            nombre_producto_marca = cur.fetchone()[0]
+
+            cur.execute("SELECT nombre_categoria FROM categorias WHERE id_categoria = %s", (id_categoria,))
+            nombre_producto_categoria = cur.fetchone()[0]
+
+            cur.close()
+            return render_template('editar_producto.html', producto=producto, categorias=categorias, marcas=marcas, nombre_producto_marca=nombre_producto_marca, nombre_producto_categoria=nombre_producto_categoria)
         else:
             flash('El producto no existe', 'error')
-            return redirect(url_for('productos'))
+            return redirect('/gestionar_productos')
+
+@app.route('/productos/<int:id_producto>/imagenes', methods=['GET', 'POST'])
+def administrar_imagenes_producto(id_producto):
+    if request.method == 'POST':
+        # Obtener la URL de la imagen desde el formulario
+        url_imagen = request.form['url_imagen']
+        if url_imagen:
+            # Conexión a la base de datos
+            cur = mysql.connection.cursor()
+            try:
+                # Insertar la URL de la imagen en la tabla imagenes
+                cur.execute("INSERT INTO imagenes (id_producto, url_imagen) VALUES (%s, %s)", (id_producto, url_imagen))
+                # Confirmar la transacción
+                mysql.connection.commit()
+                flash('Imagen actualizada correctamente', 'success')
+            except Exception as e:
+                flash(f'Error al actualizar la imagen: {str(e)}', 'error')
+            finally:
+                cur.close()
+            return redirect(url_for('administrar_imagenes_producto', id_producto=id_producto))
+
+    # Obtener las imágenes actuales del producto
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT url_imagen FROM imagenes WHERE id_producto = %s", (id_producto,))
+    imagenes = cur.fetchall()
+    cur.close()
+
+    # Renderizar el formulario para editar imágenes
+    return render_template('administrar_imagenes_producto.html', id_producto=id_producto, imagenes=imagenes)
+
+@app.route('/eliminar_imagen', methods=['POST'])
+def eliminar_imagen():
+    if request.method == 'POST':
+        # Obtener la URL de la imagen y el ID del producto desde el formulario
+        imagen_url = request.form['imagen_url']
+        id_producto = request.form['id_producto']
+        if imagen_url and id_producto:
+            # Conexión a la base de datos
+            cur = mysql.connection.cursor()
+            try:
+                # Eliminar la imagen de la tabla imagenes
+                cur.execute("DELETE FROM imagenes WHERE url_imagen = %s AND id_producto = %s", (imagen_url, id_producto))
+                # Confirmar la transacción
+                mysql.connection.commit()
+                flash('Imagen eliminada correctamente', 'success')
+            except Exception as e:
+                flash(f'Error al eliminar la imagen: {str(e)}', 'error')
+            finally:
+                cur.close()
+    return redirect(url_for('administrar_imagenes_producto', id_producto=id_producto))
+
+
 
 ## RUTAS PARA GESTIONAR SITIO
-
 @app.route('/configurar_sitio', methods=['GET', 'POST'])
 def configurar_sitio():
     mensaje = None
@@ -383,25 +500,25 @@ def editar_descuento(id):
             flash('El descuento no existe', 'error')
             return redirect('/gestionar_descuentos')
 
+
 @app.route('/descuentos/<int:id>/eliminar', methods=['POST'])
 def eliminar_descuento(id):
     if request.method == 'POST':
-        if request.form.get('_method') == 'DELETE':  # Verificar si la solicitud proviene del formulario de eliminación
-            # Conexión a la base de datos
-            cur = mysql.connection.cursor()
-            try:
-                # Eliminar el registro de la tabla descuentos
-                cur.execute("DELETE FROM descuentos WHERE id_descuento = %s", (id,))
+        # Conexión a la base de datos
+        cur = mysql.connection.cursor()
+        try:
+            # Eliminar el registro de la tabla descuentos
+            cur.execute("DELETE FROM descuentos WHERE id_descuento = %s", (id,))
                 
-                # Confirmar la transacción
-                mysql.connection.commit()
+            # Confirmar la transacción
+            mysql.connection.commit()
                 
-                flash('Descuento eliminado correctamente', 'success')
-            except Exception as e:
-                flash('Error al eliminar el descuento', 'error')
+            flash('Descuento eliminado correctamente', 'success')
+        except Exception as e:
+            flash('Error al eliminar el descuento', 'error')
             
-            # Cerrar el cursor
-            cur.close()
+        # Cerrar el cursor
+        cur.close()
     
     return redirect('/gestionar_descuentos')
 
@@ -494,7 +611,6 @@ def eliminar_categoria(id):
         
         # Cerrar el cursor
         cur.close()
-    
     return redirect('/gestionar_categorias')
 
 @app.route('/categorias/agregar', methods=['GET', 'POST'])

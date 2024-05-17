@@ -42,11 +42,9 @@
                     <td>{{ descuento[9] }}</td>
                     <td>
                         <a href="/descuentos/{{ descuento[0] }}/editar" class="btn btn-primary">Editar</a>
-                        <a href="/descuentos/{{ descuento[0] }}/eliminar" class="btn btn-danger" onclick="event.preventDefault(); document.getElementById('delete-form').submit();">Eliminar</a>
-                        <form id="delete-form" action="/descuentos/{{ descuento[0] }}/eliminar" method="POST" style="display: none;">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <!-- Puedes incluir más campos ocultos aquí si es necesario -->
-                        </form>                        
+                        <form action="/descuentos/{{ descuento[0] }}/eliminar" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este descuento');">
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}

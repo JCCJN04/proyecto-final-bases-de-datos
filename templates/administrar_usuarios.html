@@ -19,6 +19,7 @@
                     <th>Teléfono</th>
                     <th>Fecha de Ingreso</th>
                     <th>Correo</th>
+                    <th>Roles</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -30,6 +31,7 @@
                     <td>{{ empleado[3] }}</td>
                     <td>{{ empleado[4] }}</td>
                     <td>{{ empleado[5] }}</td>
+                    <td>{{ empleado[6] }}</td>
                     <td>
                         <form action="/eliminar_usuario/{{ empleado[0] }}" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este usuario?');">
                             <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>

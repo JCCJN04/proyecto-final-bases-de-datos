@@ -25,10 +25,8 @@
                     <td>{{ categoria[1] }}</td>
                     <td>
                         <a href="/categorias/{{ categoria[0] }}/editar" class="btn btn-primary">Editar</a>
-                        <a href="/categorias/{{ categoria[0] }}/eliminar" class="btn btn-danger" onclick="event.preventDefault(); document.getElementById('delete-form').submit();">Eliminar</a>
-                        <form id="delete-form" action="/categorias/{{ categorias[0] }}/eliminar" method="POST" style="display: none;">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <!-- Puedes incluir más campos ocultos aquí si es necesario -->
+                        <form action="/categorias/{{ categoria[0] }}/eliminar" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar esta categoria');">
+                            <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
                         </form>
                     </td>
                 </tr>
