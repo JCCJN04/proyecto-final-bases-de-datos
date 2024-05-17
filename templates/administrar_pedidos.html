@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrar Pedidos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .table thead th {
+            background-color: #007bff;
+            color: white;
+        }
+        .table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .form-control {
+            display: inline-block;
+            width: auto;
+            vertical-align: middle;
+        }
+        .detalle-pedido {
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row mb-4">
+            <div class="col-md-12 text-center">
+                <h1>Administrar Pedidos</h1>
+                <p>Desde aquí puedes gestionar los pedidos de tu tienda en línea.</p>
+            </div>
+        </div>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="alert alert-info">
+                    <ul class="list-unstyled mb-0">
+                        {% for message in messages %}
+                        <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endwith %}
+        <div class="row">
+            <div class="col-md-12">
+                <table class="table table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>ID Pedido</th>
+                            <th>Cliente</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        <tr>
+                            <td>{{ pedido[0] }}</td>
+                            <td>{{ pedido[1] }}</td>
+                            <td>{{ pedido[2] }}</td>
+                            <td>
+                                <form action="/pedidos/{{ pedido[0] }}/actualizar_estado" method="POST" class="form-inline">
+                                    <div class="form-group mr-2">
+                                        <select name="nuevo_estado" class="form-control">
+                                            {% for estado in estados_pedidos %}
+                                            <option value="{{ estado[0] }}" {% if pedido[3] == estado[0] %}selected{% endif %}>
+                                                {{ estado[1] }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Actualizar Estado</button>
+                                    <a href="/detalle_pedido/{{ pedido[0] }}" class="btn btn-info">Detalles</a>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-12 text-center">
+                <a href="/" class="btn btn-secondary">Regresar a Inicio</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

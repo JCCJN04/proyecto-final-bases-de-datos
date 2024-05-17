@@ -271,16 +271,30 @@ def editar_producto(id):
         nombre_producto = request.form['nombre_producto']
         descripcion_producto = request.form['descripcion_producto']
         id_categoria = request.form['categoria_producto']
-        precio_venta = request.form['precio_venta']
-        precio_compra = request.form['precio_compra']
         id_marca = request.form['marca_producto']
+        stock = request.form['stock']
+        
+        if stock:
+            stock = int(stock)
+        else:
+            stock = None
 
+        # Actualización de productos
         cur.execute("""
             UPDATE productos 
-            SET nombre_producto = %s, descripcion_producto = %s, id_marca = %s, id_categoria = %s
+            SET nombre_producto = %s, descripcion_producto = %s, id_marca = %s, id_categoria = %s 
             WHERE id_producto = %s
         """, (nombre_producto, descripcion_producto, id_marca, id_categoria, id))
 
+        # Obtener id_stock del producto
+        cur.execute("SELECT id_stock FROM productos WHERE id_producto = %s", (id,))
+        stockinfo = cur.fetchone()
+        
+        if stockinfo and stock is not None:
+            id_stock = stockinfo[0]
+            # Actualizar la cantidad de stock
+            cur.execute("UPDATE stocks SET cantidad_stock = %s WHERE id_stock = %s", (stock, id_stock))
+        
         mysql.connection.commit()
         cur.close()
 
@@ -299,8 +313,9 @@ def editar_producto(id):
         cur.close()
 
         if producto:
-            id_marca = producto[3]
-            id_categoria = producto[4]
+            id_marca = producto[4]
+            id_categoria = producto[5]
+            id_stock = producto[3]
 
             cur = mysql.connection.cursor()
             cur.execute("SELECT nombre_marca FROM marcas WHERE id_marca = %s", (id_marca,))
@@ -308,12 +323,17 @@ def editar_producto(id):
 
             cur.execute("SELECT nombre_categoria FROM categorias WHERE id_categoria = %s", (id_categoria,))
             nombre_producto_categoria = cur.fetchone()[0]
+                                                       
+            cur.execute("SELECT cantidad_stock FROM stocks WHERE id_stock = %s", (id_stock,))
+            stock = cur.fetchone()[0]
 
             cur.close()
-            return render_template('editar_producto.html', producto=producto, categorias=categorias, marcas=marcas, nombre_producto_marca=nombre_producto_marca, nombre_producto_categoria=nombre_producto_categoria)
+            return render_template('editar_producto.html', producto=producto, categorias=categorias, marcas=marcas, nombre_producto_marca=nombre_producto_marca, nombre_producto_categoria=nombre_producto_categoria, stock=stock)
         else:
             flash('El producto no existe', 'error')
             return redirect('/gestionar_productos')
+
+
 
 
 @app.route('/productos/<int:id_producto>/imagenes', methods=['GET', 'POST'])
@@ -464,7 +484,7 @@ def editar_descuento(id):
                 UPDATE descuentos 
                 SET id_producto = %s, id_estado_descuento =%s, codigo = %s, id_tipo_descuento = %s, cantidad = %s, fecha_inicio = %s, fecha_fin = %s, porcentaje = %s, descripcion = %s
                 WHERE id_descuento = %s
-            """, (codigo_producto, estado_descuento, codigo, tipo_descuento, cantidad, fecha_inicio, fecha_fin, porcentaje, descripcion, id))
+            """, (codigo_producto, estado_descuento, codigo, tipo_descuento, cantidad, porcentaje, descripcion, id))
             mysql.connection.commit()
             flash('Descuento editado correctamente', 'success')
             return redirect('/gestionar_descuentos')
@@ -629,13 +649,57 @@ def agregar_categoria():
 @app.route('/administrar_pedidos')
 def administrar_pedidos():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT pedidos.id_pedido, CONCAT(clientes.nombre, ' ', clientes.apellido), estado_pedidos.nombre FROM pedidos JOIN clientes ON pedidos.id_cliente = clientes.id_cliente JOIN estado_pedidos ON pedidos.id_estado_pedido = estado_pedidos.id_estado_pedido")
+    query = """
+    SELECT pedidos.id_pedido, 
+           CONCAT(clientes.nombre, ' ', clientes.apellido) AS cliente, 
+           estado_pedidos.nombre AS estado, 
+           pedidos.id_estado_pedido 
+    FROM pedidos 
+    JOIN clientes ON pedidos.id_cliente = clientes.id_cliente 
+    JOIN estado_pedidos ON pedidos.id_estado_pedido = estado_pedidos.id_estado_pedido
+    """
+    cur.execute(query)
     pedidos = cur.fetchall()
+
     cur.execute("SELECT * FROM estado_pedidos")
     estados_pedidos = cur.fetchall()
+    
+    # Obtener detalles de los pedidos
+    cur.execute("SELECT * FROM detalle_pedidos")
+    detalle_pedidos = cur.fetchall()
+    
     cur.close()
-    return render_template('administrar_pedidos.html', pedidos=pedidos, estados_pedidos=estados_pedidos)
+    
+    return render_template('administrar_pedidos.html', pedidos=pedidos, estados_pedidos=estados_pedidos, detalle_pedidos=detalle_pedidos)
 
+@app.route('/detalle_pedidos/<int:id_pedido>')
+def detalle_pedido(id_pedido):
+    cur = mysql.connection.cursor()
+
+    # Obtener los detalles del pedido
+    cur.execute("""
+        SELECT pedidos.id_pedido, pedidos.id_cliente, clientes.nombre, clientes.apellido, estado_pedidos.nombre 
+        FROM pedidos 
+        JOIN clientes ON pedidos.id_cliente = clientes.id_cliente 
+        JOIN estado_pedidos ON pedidos.id_estado_pedido = estado_pedidos.id_estado_pedido 
+        WHERE pedidos.id_pedido = %s
+    """, (id_pedido,))
+    pedido = cur.fetchone()
+
+    # Obtener los productos asociados al pedido
+    cur.execute("""
+        SELECT productos.nombre_producto, productos.descripcion_producto, precios.precio_venta, marcas.nombre_marca, detalle_pedidos.cantidad 
+        FROM detalle_pedidos 
+        JOIN productos ON detalle_pedidos.id_producto = productos.id_producto 
+        JOIN precios ON productos.id_producto = precios.id_producto 
+        JOIN marcas ON productos.id_marca = marcas.id_marca 
+        WHERE detalle_pedidos.id_pedido = %s
+    """, (id_pedido,))
+    productos_pedido = cur.fetchall()
+
+    cur.close()
+
+    return render_template('detalle_pedidos.html', pedido=pedido, productos_pedido=productos_pedido)
 
 if __name__ == '__main__':
     app.run(debug=True)
