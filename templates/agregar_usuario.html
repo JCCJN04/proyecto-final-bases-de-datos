@@ -47,6 +47,18 @@
                 <label for="fecha_ingreso">Fecha de Ingreso</label>
                 <input type="date" class="form-control" id="fecha_ingreso" name="fecha_ingreso" required>
             </div>
+            <div class="form-group">
+                <label for="rol">Rol</label>
+                <select class="form-control" id="rol" name="rol" required>
+                    <option value="Productos">Productos</option>
+                    <option value="Usuarios">Usuarios</option>
+                    <option value="Config sitio">Config sitio</option>
+                    <option value="Categorías">Categorias</option>
+                    <option value="Pedidos">Pedidos</option>
+                    <option value="Descuentos">Descuentos</option>
+                    <option value="Reportes">Reportes</option>
+                </select>
+            </div>
             <button type="submit" class="btn btn-primary">Agregar Usuario</button>
             <a href="/administrar_usuarios" class="btn btn-secondary">Volver a Administrar Usuarios</a>
         </form>

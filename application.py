@@ -15,6 +15,7 @@ app.config['MYSQL_DB'] = 'sqlproyectofinalalex'
 print("Conexión exitosa")
 
 # Ruta para la página de inicio de sesión
+# Ruta para la página de inicio de sesión
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -25,18 +26,30 @@ def login():
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM login_empleado WHERE usuario = %s AND contrasena = %s", (username, password))
         user = cur.fetchone()
-        cur.close()
 
         if user:
-            # Iniciar sesión
-            session['logged_in'] = True
-            session['username'] = username
-            flash('¡Inicio de sesión exitoso!', 'success')
-            return redirect(url_for('inicio'))
+            id_empleado = user[1]  # Usamos el índice correspondiente al id_empleado
+            # Obtener el rol del usuario
+            cur.execute("SELECT rol FROM empleados WHERE id_empleado = %s", (id_empleado,))
+            empleado = cur.fetchone()
+            cur.close()
+
+            if empleado:
+                rol = empleado[0]  # Usamos el índice correspondiente al rol
+                # Iniciar sesión
+                session['logged_in'] = True
+                session['username'] = username
+                session['rol'] = rol
+                
+                flash('¡Inicio de sesión exitoso!', 'success')
+                return redirect(url_for('inicio'))
+            else:
+                flash('No se pudo encontrar el rol del usuario.', 'error')
         else:
             flash('Credenciales incorrectas. Inténtalo de nuevo.', 'error')
 
     return render_template('login.html')
+
 
 # Ruta para ver la cuenta del usuario
 @app.route('/ver_cuenta')
@@ -100,11 +113,12 @@ def agregar_usuario():
         apellido = request.form['apellido']
         telefono = request.form['telefono']
         fecha_ingreso = request.form['fecha_ingreso']
+        rol = request.form['rol']  # Nuevo campo para el rol del usuario
 
         # Insertar nuevo empleado en la tabla empleados
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO empleados (nombre, apellido, telefono, fecha_ingreso, correo) VALUES (%s, %s, %s, %s, %s)",
-                    (nombre, apellido, telefono, fecha_ingreso, email))
+        cur.execute("INSERT INTO empleados (nombre, apellido, telefono, fecha_ingreso, correo, rol) VALUES (%s, %s, %s, %s, %s, %s)",
+                    (nombre, apellido, telefono, fecha_ingreso, email, rol))
         mysql.connection.commit()
 
         # Obtener el ID del último empleado insertado
@@ -121,6 +135,7 @@ def agregar_usuario():
         return redirect(url_for('agregar_usuario'))
 
     return render_template('agregar_usuario.html')
+
 
 @app.route('/eliminar_usuario/<int:id>', methods=['POST'])
 def eliminar_empleado(id):
@@ -719,17 +734,32 @@ def detalle_pedido(id_pedido):
 
     return render_template('detalle_pedidos.html', pedido=pedido, productos_pedido=productos_pedido)
 
-
 @app.route('/reportes_estadisticas')
 def reportes_estadisticas():
-    # Datos de ventas para la tabla (esto normalmente vendría de una base de datos)
-    ventas = [
-        {'producto': 'Panel Solar A', 'ventas': 120, 'ingresos': 3000},
-        {'producto': 'Panel Solar B', 'ventas': 85, 'ingresos': 2200},
-        {'producto': 'Panel Solar C', 'ventas': 45, 'ingresos': 1500},
-        {'producto': 'Panel Solar D', 'ventas': 30, 'ingresos': 800},
-    ]
-    return render_template('reportes_estadisticas.html', ventas=ventas)
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        SELECT p.nombre_producto, COUNT(dp.id_producto) AS cantidad 
+        FROM detalle_pedidos AS dp 
+        JOIN productos AS p ON dp.id_producto = p.id_producto 
+        GROUP BY p.id_producto 
+        ORDER BY cantidad DESC
+        LIMIT 5;
+    """)
+    ventas = cur.fetchall()
+    cur.execute("""
+        SELECT ep.nombre, COUNT(p.id_estado_pedido) AS cantidad
+        FROM estado_pedidos AS ep
+        JOIN pedidos AS p ON ep.id_estado_pedido = p.id_estado_pedido
+        GROUP BY ep.nombre
+        ORDER BY cantidad DESC;
+    """)
+    estados = cur.fetchall()
+    cur.close()
+    
+    data_estados = [{"name": estado[0], "y": estado[1]} for estado in estados]
+    data_ventas = [{"name": venta[0], "y": venta[1]} for venta in ventas]
+    
+    return render_template('reportes_estadisticas.html', estados=estados, ventas=ventas, data_ventas=data_ventas, data_estados=data_estados)
 
 if __name__ == '__main__':
     app.run(debug=True)

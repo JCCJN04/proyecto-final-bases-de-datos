@@ -19,47 +19,69 @@
                 <a href="{{ url_for('logout') }}" class="btn btn-danger">Cerrar sesión</a>
             </div>
         </div>
+
+        <!-- Mostrar botones basados en el rol del usuario -->
+        {% if session['rol'] == 'Administrador' or session['rol'] == 'Productos' %}
         <div class="row mt-4">
             <div class="col-md-6">
                 <h2>Productos</h2>
                 <p>Administra tus productos aquí.</p>
                 <a href="/gestionar_productos" class="btn btn-primary">Administrar Productos</a>
             </div>
+        </div>
+        {% endif %}
+
+        {% if session['rol'] == 'Administrador' or session['rol'] == 'Usuarios' %}
+        <div class="row mt-4">
             <div class="col-md-6">
                 <h2>Usuarios</h2>
                 <p>Administra los usuarios de tu tienda aquí.</p>
                 <a href="/administrar_usuarios" class="btn btn-primary">Administrar Usuarios</a>
             </div>
         </div>
-        <!-- Nuevo botón para configurar el sitio -->
+        {% endif %}
+
+        {% if session['rol'] == 'Administrador' or session['rol'] == 'Config sitio' %}
         <div class="row mt-4">
             <div class="col-md-6">
                 <h2>Configuración del Sitio</h2>
                 <p>Configura la información del sitio aquí.</p>
                 <a href="/mostrar_sitio" class="btn btn-primary">Configurar Sitio</a>
             </div>
-            <!-- Nuevo botón para gestionar categorías -->
+        </div>
+        {% endif %}
+
+        {% if session['rol'] == 'Administrador' or session['rol'] == 'Categorias' %}
+        <div class="row mt-4">
             <div class="col-md-6">
                 <h2>Gestión de Categorías</h2>
                 <p>Administra las categorías de productos aquí.</p>
                 <a href="/gestionar_categorias" class="btn btn-primary">Gestionar Categorías</a>
             </div>
         </div>
-        <!-- Nuevo botón para gestionar pedidos -->
+        {% endif %}
+
+        {% if session['rol'] == 'Administrador' or session['rol'] == 'Pedidos' %}
         <div class="row mt-4">
             <div class="col-md-6">
                 <h2>Gestión de Pedidos</h2>
                 <p>Administra los pedidos de productos aquí.</p>
                 <a href="/administrar_pedidos" class="btn btn-primary">Gestionar Pedidos</a>
             </div>
-            <!-- Nuevo botón para gestionar descuentos -->
+        </div>
+        {% endif %}
+
+        {% if session['rol'] == 'Administrador' or session['rol'] == 'Descuentos' %}
+        <div class="row mt-4">
             <div class="col-md-6">
                 <h2>Gestión de Descuentos</h2>
                 <p>Administra los descuentos de productos aquí.</p>
                 <a href="{{ url_for('gestionar_descuentos') }}" class="btn btn-primary">Gestionar Descuentos</a>
             </div>
         </div>
-        <!-- Nuevo botón para reportes y estadísticas -->
+        {% endif %}
+
+        {% if session['rol'] == 'Administrador' or session['rol'] == 'Reporte' %}
         <div class="row mt-4">
             <div class="col-md-6">
                 <h2>Reportes y Estadísticas</h2>
@@ -67,6 +89,7 @@
                 <a href="/reportes_estadisticas" class="btn btn-primary">Ver Reportes y Estadísticas</a>
             </div>
         </div>
+        {% endif %}
     </div>
 </body>
 </html>

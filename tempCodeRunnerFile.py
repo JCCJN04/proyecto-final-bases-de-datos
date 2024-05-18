@@ -1,1 +1,1 @@
-detalle_pedidos
+if __name__ == '__main__':
