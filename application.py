@@ -683,16 +683,8 @@ def agregar_categoria():
 @app.route('/administrar_pedidos')
 def administrar_pedidos():
     cur = mysql.connection.cursor()
-    query = """
-    SELECT pedidos.id_pedido, 
-           CONCAT(clientes.nombre, ' ', clientes.apellido) AS cliente, 
-           estado_pedidos.nombre AS estado, 
-           pedidos.id_estado_pedido 
-    FROM pedidos 
-    JOIN clientes ON pedidos.id_cliente = clientes.id_cliente 
-    JOIN estado_pedidos ON pedidos.id_estado_pedido = estado_pedidos.id_estado_pedido
-    """
-    cur.execute(query)
+    cur.execute("""SELECT pedidos.id_pedido, CONCAT(clientes.nombre, ' ', clientes.apellido) AS cliente, estado_pedidos.nombre AS estado, pedidos.id_estado_pedido 
+    FROM pedidos JOIN clientes ON pedidos.id_cliente = clientes.id_cliente JOIN estado_pedidos ON pedidos.id_estado_pedido = estado_pedidos.id_estado_pedido""")
     pedidos = cur.fetchall()
 
     cur.execute("SELECT * FROM estado_pedidos")
