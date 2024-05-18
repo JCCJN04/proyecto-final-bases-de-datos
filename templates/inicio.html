@@ -21,75 +21,69 @@
         </div>
 
         <!-- Mostrar botones basados en el rol del usuario -->
-        {% if session['rol'] == 'Administrador' or session['rol'] == 'Productos' %}
         <div class="row mt-4">
-            <div class="col-md-6">
+            {% if session['rol'] == 'Administrador' or session['rol'] == 'Productos' %}
+            <div class="col-md-6 mb-4">
                 <h2>Productos</h2>
                 <p>Administra tus productos aquí.</p>
                 <a href="/gestionar_productos" class="btn btn-primary">Administrar Productos</a>
             </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
-        {% if session['rol'] == 'Administrador' or session['rol'] == 'Usuarios' %}
-        <div class="row mt-4">
-            <div class="col-md-6">
+            {% if session['rol'] == 'Administrador' or session['rol'] == 'Usuarios' %}
+            <div class="col-md-6 mb-4">
                 <h2>Usuarios</h2>
                 <p>Administra los usuarios de tu tienda aquí.</p>
                 <a href="/administrar_usuarios" class="btn btn-primary">Administrar Usuarios</a>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
 
-        {% if session['rol'] == 'Administrador' or session['rol'] == 'Config sitio' %}
         <div class="row mt-4">
-            <div class="col-md-6">
+            {% if session['rol'] == 'Administrador' or session['rol'] == 'Config sitio' %}
+            <div class="col-md-6 mb-4">
                 <h2>Configuración del Sitio</h2>
                 <p>Configura la información del sitio aquí.</p>
                 <a href="/mostrar_sitio" class="btn btn-primary">Configurar Sitio</a>
             </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
-        {% if session['rol'] == 'Administrador' or session['rol'] == 'Categorias' %}
-        <div class="row mt-4">
-            <div class="col-md-6">
+            {% if session['rol'] == 'Administrador' or session['rol'] == 'Categorias' %}
+            <div class="col-md-6 mb-4">
                 <h2>Gestión de Categorías</h2>
                 <p>Administra las categorías de productos aquí.</p>
                 <a href="/gestionar_categorias" class="btn btn-primary">Gestionar Categorías</a>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
 
-        {% if session['rol'] == 'Administrador' or session['rol'] == 'Pedidos' %}
         <div class="row mt-4">
-            <div class="col-md-6">
+            {% if session['rol'] == 'Administrador' or session['rol'] == 'Pedidos' %}
+            <div class="col-md-6 mb-4">
                 <h2>Gestión de Pedidos</h2>
                 <p>Administra los pedidos de productos aquí.</p>
                 <a href="/administrar_pedidos" class="btn btn-primary">Gestionar Pedidos</a>
             </div>
-        </div>
-        {% endif %}
+            {% endif %}
 
-        {% if session['rol'] == 'Administrador' or session['rol'] == 'Descuentos' %}
-        <div class="row mt-4">
-            <div class="col-md-6">
+            {% if session['rol'] == 'Administrador' or session['rol'] == 'Descuentos' %}
+            <div class="col-md-6 mb-4">
                 <h2>Gestión de Descuentos</h2>
                 <p>Administra los descuentos de productos aquí.</p>
                 <a href="{{ url_for('gestionar_descuentos') }}" class="btn btn-primary">Gestionar Descuentos</a>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
 
-        {% if session['rol'] == 'Administrador' or session['rol'] == 'Reporte' %}
         <div class="row mt-4">
-            <div class="col-md-6">
+            {% if session['rol'] == 'Administrador' or session['rol'] == 'Reporte' %}
+            <div class="col-md-6 mb-4">
                 <h2>Reportes y Estadísticas</h2>
                 <p>Genera informes y estadísticas sobre las ventas, el rendimiento de los productos, y más.</p>
                 <a href="/reportes_estadisticas" class="btn btn-primary">Ver Reportes y Estadísticas</a>
             </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 </body>
 </html>
